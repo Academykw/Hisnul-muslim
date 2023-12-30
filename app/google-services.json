@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "446647885054",
+    "firebase_url": "https://tafseer-dr-sharafudeen-default-rtdb.firebaseio.com",
+    "project_id": "tafseer-dr-sharafudeen",
+    "storage_bucket": "tafseer-dr-sharafudeen.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446647885054:android:4f5689b22c9081fbdf59af",
+        "android_client_info": {
+          "package_name": "com.sirwhite.drsharafudeen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsR24jjpz8GLuaWz5Yv0UGY1MwqhOS26M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446647885054:android:3c87b1e80cfaa53ddf59af",
+        "android_client_info": {
+          "package_name": "com.sirwhite.hisnulmuslim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsR24jjpz8GLuaWz5Yv0UGY1MwqhOS26M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446647885054:android:279da1aadbdff9dbdf59af",
+        "android_client_info": {
+          "package_name": "com.sirwhite.technology.musicplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsR24jjpz8GLuaWz5Yv0UGY1MwqhOS26M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "446647885054-b8t11r6cfbet4u2a622quvcdubfr6p5i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
