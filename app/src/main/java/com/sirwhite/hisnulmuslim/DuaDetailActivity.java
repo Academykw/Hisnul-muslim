@@ -16,19 +16,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
 import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
+
+
 import com.sirwhite.hisnulmuslim.adapter.DuaDetailAdapter;
 import com.sirwhite.hisnulmuslim.loader.DuaDetailsLoader;
 import com.sirwhite.hisnulmuslim.model.Dua;
@@ -48,10 +40,10 @@ public class DuaDetailActivity extends AppCompatActivity
     private TextView my_toolbar_duaGroup_number;
     private TextView my_autofit_toolbar_title;
     private AdView mAdView;
-    private ReviewManager reviewManager;
+
     InterstitialAd interstitialAd;
 
-    ReviewInfo reviewInfo;
+
 
 
     @Override
@@ -61,16 +53,8 @@ public class DuaDetailActivity extends AppCompatActivity
 
 
 
-        RequestReviewInfo();
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+
 
         toolbar = (Toolbar) findViewById(R.id.my_detail_action_bar);
         my_toolbar_duaGroup_number = (TextView) findViewById(R.id.txtReference_duaDetail);
@@ -133,38 +117,8 @@ public class DuaDetailActivity extends AppCompatActivity
             adapter.setData(data);
         }
     }
-    private void RequestReviewInfo(){
 
-        ReviewManager manager = ReviewManagerFactory.create(this);
-        com.google.android.play.core.tasks.Task<ReviewInfo> request = manager.requestReviewFlow();
-        request.addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // We can get the ReviewInfo object
-                ReviewInfo reviewInfo = task.getResult();
-            } else {
-                // There was some problem, log or handle the error code.
-                //@ReviewErrorCode int reviewErrorCode = ((TaskException) task.getException()).getErrorCode();
-            }
-        });
 
-    }
-    private void ShowReviewFlow(){
-
-        if (reviewInfo != null){
-            com.google.android.play.core.tasks.Task<Void> flow = reviewManager.launchReviewFlow(this, reviewInfo);
-            flow.addOnCompleteListener(task -> {
-                // The flow has finished. The API does not indicate whether the user
-                // reviewed or not, or even whether the review dialog was shown. Thus, no
-                // matter the result, we continue our app flow.
-                Toast.makeText(getBaseContext(),
-                                "Review successful!", Toast.LENGTH_LONG)
-                        .show();
-
-            });
-        }else {
-            finish();
-        }
-    }
 
     @Override
     public void onLoaderReset(Loader<List<Dua>> loader) {
@@ -180,65 +134,9 @@ public class DuaDetailActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        LoaddAdss();
-        ShowReviewFlow();
+
+
         super.onBackPressed();
     }
-    public void LoaddAdss(){
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(this,"ca-app-pub-7161605136303278/3645817101", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-
-                        Toast.makeText(DuaDetailActivity.this,"Ad Loaded", Toast.LENGTH_SHORT).show();
-                        interstitialAd.show(DuaDetailActivity.this);
-                        interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                super.onAdFailedToShowFullScreenContent(adError);
-                                //Toast.makeText(MainActivity.this, "Faild to show Ad", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                super.onAdShowedFullScreenContent();
-                                //Toast.makeText(MainActivity.this,"Ad Shown Successfully",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                super.onAdDismissedFullScreenContent();
-                                // Toast.makeText(MainActivity.this,"Ad Dismissed / Closed",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdImpression() {
-                                super.onAdImpression();
-                                // Toast.makeText(MainActivity.this,"Ad Impression Count",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdClicked() {
-                                super.onAdClicked();
-                                //Toast.makeText(MainActivity.this,"Ad Clicked",Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        //Toast.makeText(MainActivity.this,"Failed to Load Ad because="+loadAdError.getMessage(),Toast.LENGTH_SHORT).show();
-                    }
-                });
-}
 }

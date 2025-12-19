@@ -23,38 +23,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.play.core.appupdate.AppUpdateInfo;
-import com.google.android.play.core.appupdate.AppUpdateManager;
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.install.InstallState;
-import com.google.android.play.core.install.InstallStateUpdatedListener;
-import com.google.android.play.core.install.model.AppUpdateType;
-import com.google.android.play.core.install.model.InstallStatus;
-import com.google.android.play.core.install.model.UpdateAvailability;
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.review.model.ReviewErrorCode;
-import com.google.android.play.core.tasks.OnSuccessListener;
-import com.google.android.ump.ConsentForm;
-import com.google.android.ump.ConsentInformation;
-import com.google.android.ump.ConsentRequestParameters;
-import com.google.android.ump.FormError;
-import com.google.android.ump.UserMessagingPlatform;
-import com.google.firebase.messaging.FirebaseMessaging;
+
 import com.sirwhite.hisnulmuslim.adapter.DuaGroupAdapter;
 import com.sirwhite.hisnulmuslim.loader.DuaGroupLoader;
 import com.sirwhite.hisnulmuslim.model.Dua;
@@ -67,16 +36,13 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private DuaGroupAdapter mAdapter;
     private ListView mListView;
     private Toolbar toolbar;
-    private AdView mAdView;
+
     long back_pressed;
 
-    private AppUpdateManager mAppUpdateManager;
+
     private static final int RC_APP_UPDATE = 100;
 
 
-    //gdpr
-    private ConsentInformation consentInformation;
-    private ConsentForm consentForm;
 
 
 
@@ -84,98 +50,18 @@ public class DuaGroupActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dua_group);
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-
-
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-
-     // LoaddAdss();
-
-        ConsentRequestParameters params = new ConsentRequestParameters
-                .Builder()
-                .setTagForUnderAgeOfConsent(false)
-                .build();
-
-        consentInformation = UserMessagingPlatform.getConsentInformation(this);
-        consentInformation.requestConsentInfoUpdate(
-                this,
-                params,
-                new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
-                    @Override
-                    public void onConsentInfoUpdateSuccess() {
-                        // The consent information state was updated.
-                        // You are now ready to check if a form is available.
-                    }
-                },
-                new ConsentInformation.OnConsentInfoUpdateFailureListener() {
-                    @Override
-                    public void onConsentInfoUpdateFailure(FormError formError) {
-                        // Handle the error.
-                    }
-                });
-        consentInformation.requestConsentInfoUpdate(
-                this,
-                params,
-                new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
-                    @Override
-                    public void onConsentInfoUpdateSuccess() {
-                        // The consent information state was updated.
-                        // You are now ready to check if a form is available.
-                        if (consentInformation.isConsentFormAvailable()) {
-                            loadForm();
-                        }
-                    }
-                },
-                new ConsentInformation.OnConsentInfoUpdateFailureListener() {
-                    @Override
-                    public void onConsentInfoUpdateFailure(FormError formError) {
-                        // Handle the error.
-                    }
-                });
-
-
-        mAppUpdateManager= AppUpdateManagerFactory.create(this);
-        mAppUpdateManager.getAppUpdateInfo().addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
-            @Override
-            public void onSuccess(AppUpdateInfo result) {
-
-                if (result.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                        && result.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)){
-                    try {
-                        mAppUpdateManager.startUpdateFlowForResult(result,AppUpdateType.FLEXIBLE,DuaGroupActivity.this,
-                                RC_APP_UPDATE );
-                    } catch (IntentSender.SendIntentException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        });
 
 
 
 
 
-        FirebaseMessaging.getInstance().subscribeToTopic("News")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        String msg = "Done";
-                        if (!task.isSuccessful()) {
-                            msg = "Failed";
-                        }
 
-                    }
-                });
 
-        mAppUpdateManager.registerListener(installStateUpdatedListener);
+
+
+
+
+
 
 
         toolbar = (Toolbar) findViewById(R.id.my_action_bar);
@@ -277,36 +163,14 @@ public class DuaGroupActivity extends AppCompatActivity implements
             mAdapter.setData(data);
         }
     }
-    private InstallStateUpdatedListener installStateUpdatedListener = new InstallStateUpdatedListener() {
-        @Override
-        public void onStateUpdate(InstallState state) {
 
-            if (state.installStatus()  == InstallStatus.DOWNLOADED){
-                showCompletedUpdate();
-            }
-        }
-    };
 
     @Override
     protected void onStop() {
-
-        if ( mAppUpdateManager != null) mAppUpdateManager.unregisterListener(installStateUpdatedListener);
         super.onStop();
     }
 
-    private void showCompletedUpdate() {
-        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),"NEW APP UPDATE IS AVAILABLE!",
-                Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("INSTALL", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAppUpdateManager.completeUpdate();
-            }
-        });
 
-
-        snackbar.show();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -338,96 +202,6 @@ public class DuaGroupActivity extends AppCompatActivity implements
     }
 
 
-    public void LoaddAdss(){
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
 
 
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(this,"ca-app-pub-8797909986753585/4456878156", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-
-                        Toast.makeText(DuaGroupActivity.this,"Ad Loaded", Toast.LENGTH_SHORT).show();
-                        interstitialAd.show(DuaGroupActivity.this);
-                        interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                super.onAdFailedToShowFullScreenContent(adError);
-                                //Toast.makeText(MainActivity.this, "Faild to show Ad", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                super.onAdShowedFullScreenContent();
-                                //Toast.makeText(MainActivity.this,"Ad Shown Successfully",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                super.onAdDismissedFullScreenContent();
-                                // Toast.makeText(MainActivity.this,"Ad Dismissed / Closed",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdImpression() {
-                                super.onAdImpression();
-                                // Toast.makeText(MainActivity.this,"Ad Impression Count",Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onAdClicked() {
-                                super.onAdClicked();
-                                //Toast.makeText(MainActivity.this,"Ad Clicked",Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        //Toast.makeText(MainActivity.this,"Failed to Load Ad because="+loadAdError.getMessage(),Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-    }
-    public void loadForm() {
-        // Loads a consent form. Must be called on the main thread.
-        UserMessagingPlatform.loadConsentForm(
-                this,
-                new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
-                    @Override
-                    public void onConsentFormLoadSuccess(ConsentForm consentForm) {
-                        DuaGroupActivity.this.consentForm = consentForm;
-                        if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
-                            consentForm.show(
-                                    DuaGroupActivity.this,
-                                    new ConsentForm.OnConsentFormDismissedListener() {
-                                        @Override
-                                        public void onConsentFormDismissed(@Nullable FormError formError) {
-                                            if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
-                                                // App can start requesting ads.
-                                            }
-
-                                            // Handle dismissal by reloading form.
-                                            loadForm();
-                                        }
-                                    });
-                        }
-                    }
-                },
-                new UserMessagingPlatform.OnConsentFormLoadFailureListener() {
-                    @Override
-                    public void onConsentFormLoadFailure(FormError formError) {
-                        // Handle Error.
-                    }
-                }
-        );
-}
 }

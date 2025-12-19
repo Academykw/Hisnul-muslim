@@ -23,14 +23,7 @@ public class DuaGroupLoader extends AbstractQueryLoader<List<Dua>> {
     @Override
     public List<Dua> loadInBackground() {
 
-        /*Locale mArabicLocale = new Locale("ar_EG", "ar_IL");
 
-        deviceLocale = Resources.getSystem().getConfiguration().locale;
-
-        if (deviceLocale.equals(Locale.ENGLISH))
-            groupTitleLanguage = HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE;
-        else if (deviceLocale.equals(mArabicLocale))
-            groupTitleLanguage = HisnDatabaseInfo.DuaGroupTable.ARABIC_TITLE;*/
 
         List<Dua> results = null;
         Cursor duaGroupCursor = null;
