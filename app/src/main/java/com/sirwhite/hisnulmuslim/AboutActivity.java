@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 public class AboutActivity extends AppCompatActivity {
-    private AdView mAdView;
+
     private Toolbar toolbar;
 
     @Override
@@ -36,9 +36,6 @@ public class AboutActivity extends AppCompatActivity {
             }
         });
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
 
         toolbar = (Toolbar) findViewById(R.id.my_action_bar);
         View mToolbarShadow = findViewById(R.id.view_toolbar_shadow);
