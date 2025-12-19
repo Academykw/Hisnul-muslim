@@ -40,22 +40,16 @@ public class BookmarksDetailActivity extends AppCompatActivity
     private Toolbar toolbar;
     private TextView my_toolbar_duaGroup_number;
     private TextView my_autofit_toolbar_title;
-    private AdView mAdView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks_detail);
 
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
 
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+
+
 
         toolbar = (Toolbar) findViewById(R.id.my_detail_action_bar);
         my_toolbar_duaGroup_number = (TextView) findViewById(R.id.txtReference_duaDetail);
