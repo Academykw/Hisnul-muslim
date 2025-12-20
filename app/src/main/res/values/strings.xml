@@ -45,4 +45,18 @@
     <string name="snackbar_text_begin" translatable="false">Removed Dua #</string>
     <string name="snackbar_text_end" translatable="false">" from bookmarks"</string>
     <string name="snackbar_action" translatable="false">undo</string>
+
+    <!-- Theme Preferences -->
+    <string name="pref_theme_title">Theme</string>
+    <string name="pref_theme_summary">Select the application theme</string>
+    <string-array name="pref_theme_entries">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System Default</item>
+    </string-array>
+    <string-array name="pref_theme_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>system</item>
+    </string-array>
 </resources>
