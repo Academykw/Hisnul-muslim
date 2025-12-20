@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +33,6 @@ public class DuaDetailAdapter extends BaseAdapter {
     private final float prefOtherFontSize;
     private final String prefArabicFontTypeface;
 
-    ExternalDbOpenHelper mDbHelper;
-
     private String myToolbarTitle;
 
     public DuaDetailAdapter(Context context, List<Dua> items, String toolbarTitle) {
@@ -58,8 +55,12 @@ public class DuaDetailAdapter extends BaseAdapter {
                         context.getResources().getInteger(R.integer.pref_font_other_size_default));
 
         if (sCachedTypeface == null) {
-            sCachedTypeface = Typeface.createFromAsset(
-                    context.getAssets(), prefArabicFontTypeface);
+            try {
+                sCachedTypeface = Typeface.createFromAsset(
+                        context.getAssets(), prefArabicFontTypeface);
+            } catch (Exception e) {
+                sCachedTypeface = Typeface.DEFAULT;
+            }
         }
 
         myToolbarTitle = toolbarTitle;
@@ -109,46 +110,37 @@ public class DuaDetailAdapter extends BaseAdapter {
             mHolder.shareButton = (IconicsButton) convertView.findViewById(R.id.button_share);
             mHolder.favButton = (IconicsButton) convertView.findViewById(R.id.button_star);
 
-            final ViewHolder finalHolder = mHolder;
             mHolder.shareButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View convertView) {
+                public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
                     intent.putExtra(Intent.EXTRA_TEXT,
                             myToolbarTitle + "\n\n" +
-                                    finalHolder.tvDuaArabic.getText() + "\n\n" +
-                                    finalHolder.tvDuaTranslation.getText() + "\n\n" +
-                                    finalHolder.tvDuaReference.getText() + "\n\n" +
-                                    convertView.getResources().getString(R.string.action_share_credit)
+                                    mHolder.tvDuaArabic.getText() + "\n\n" +
+                                    mHolder.tvDuaTranslation.getText() + "\n\n" +
+                                    mHolder.tvDuaReference.getText() + "\n\n" +
+                                    v.getResources().getString(R.string.action_share_credit)
                     );
                     intent.setType("text/plain");
-                    convertView.getContext().startActivity(
+                    v.getContext().startActivity(
                             Intent.createChooser(
                                     intent,
-                                    convertView.getResources().getString(R.string.action_share_title)
+                                    v.getResources().getString(R.string.action_share_title)
                             )
                     );
                 }
             });
 
-            final View finalConvertView = convertView;
             mHolder.favButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View ConvertView) {
+                public void onClick(View v) {
                     boolean isFav = !p.getFav();
+                    SQLiteDatabase db = ExternalDbOpenHelper.getInstance(v.getContext()).getDb();
 
-                    // Following snippet taken from:
-                    // http://developer.android.com/training/basics/data-storage/databases.html#UpdateDbRow
-                    mDbHelper = new ExternalDbOpenHelper(finalConvertView.getContext().getApplicationContext());
-
-                    SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-                    // New value for one column
                     ContentValues values = new ContentValues();
-                    values.put(HisnDatabaseInfo.DuaTable.FAV, isFav);
+                    values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
 
-                    // Which row to update, based on the ID
-                    String selection = HisnDatabaseInfo.DuaTable.DUA_ID + " LIKE ?";
-                    String[] selectionArgs = {String.valueOf(finalHolder.tvDuaNumber.getText().toString())};
+                    String selection = HisnDatabaseInfo.DuaTable.DUA_ID + " = ?";
+                    String[] selectionArgs = {String.valueOf(p.getReference())};
 
                     int count = db.update(
                             HisnDatabaseInfo.DuaTable.TABLE_NAME,
@@ -157,12 +149,8 @@ public class DuaDetailAdapter extends BaseAdapter {
                             selectionArgs);
 
                     if (count == 1) {
-                        if (isFav) {
-                            finalHolder.favButton.setText("{faw-star}");
-                        } else {
-                            finalHolder.favButton.setText("{faw-star-o}");
-                        }
                         p.setFav(isFav);
+                        notifyDataSetChanged();
                     }
                 }
             });
@@ -180,17 +168,13 @@ public class DuaDetailAdapter extends BaseAdapter {
             if (p.getBook_reference() != null)
                 mHolder.tvDuaReference.setText(Html.fromHtml(p.getBook_reference()));
             else
-                mHolder.tvDuaReference.setText("null");
+                mHolder.tvDuaReference.setText("");
 
             if (p.getFav()) {
                 mHolder.favButton.setText("{faw-star}");
             } else {
                 mHolder.favButton.setText("{faw-star-o}");
             }
-
-            Log.d("DuaDetailAdapter", "getFav");
-            Log.d("DuaDetailAdapter", "asdasds");
-            Log.d("DuaDetailAdapter", Boolean.toString(p.getFav()));
         }
 
 

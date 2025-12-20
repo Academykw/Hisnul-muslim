@@ -1,5 +1,6 @@
 package com.sirwhite.hisnulmuslim.adapter;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,6 +20,7 @@ import com.sirwhite.hisnulmuslim.R;
 import com.sirwhite.hisnulmuslim.database.ExternalDbOpenHelper;
 import com.sirwhite.hisnulmuslim.database.HisnDatabaseInfo;
 import com.sirwhite.hisnulmuslim.model.Dua;
+import com.mikepenz.iconics.view.IconicsButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +45,6 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public Filter getFilter() {
-        // return a filter that filters data based on a constraint
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
@@ -53,12 +54,20 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
                 final List<Dua> duas = new ArrayList<>();
                 Cursor c = null;
                 try {
-                    c = db.query(HisnDatabaseInfo.DuaGroupTable.TABLE_NAME, null,
-                            HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE + " like ?",
-                            new String[]{"%" + constraint + "%"}, null, null, null);
+                    String query = "SELECT g." + HisnDatabaseInfo.DuaGroupTable._ID + ", " +
+                            "g." + HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE + ", " +
+                            "(SELECT COUNT(*) FROM " + HisnDatabaseInfo.DuaTable.TABLE_NAME + 
+                            " WHERE " + HisnDatabaseInfo.DuaTable.GROUP_ID + " = g." + HisnDatabaseInfo.DuaGroupTable._ID + 
+                            " AND " + HisnDatabaseInfo.DuaTable.FAV + " = 1) as fav_count " +
+                            "FROM " + HisnDatabaseInfo.DuaGroupTable.TABLE_NAME + " g " +
+                            "WHERE g." + HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE + " LIKE ?" +
+                            "ORDER BY g." + HisnDatabaseInfo.DuaGroupTable._ID;
+                    
+                    c = db.rawQuery(query, new String[]{"%" + constraint + "%"});
+                    
                     if (c != null && c.moveToFirst()) {
                         do {
-                            final Dua dua = new Dua(c.getInt(0), c.getString(2));
+                            final Dua dua = new Dua(c.getInt(0), c.getString(1), c.getInt(2) > 0);
                             duas.add(dua);
                         } while (c.moveToNext());
                     }
@@ -104,32 +113,48 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        ViewHolder mHolder;
+        final ViewHolder mHolder;
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.dua_group_item_card, parent, false);
             mHolder = new ViewHolder();
             mHolder.tvReference = (TextView) convertView.findViewById(R.id.txtReference);
             mHolder.tvDuaName = (TextView) convertView.findViewById(R.id.txtDuaName);
+            mHolder.btnFav = (IconicsButton) convertView.findViewById(R.id.button_star_group);
             mHolder.shape = (GradientDrawable) mHolder.tvReference.getBackground();
             convertView.setTag(mHolder);
         } else {
             mHolder = (ViewHolder) convertView.getTag();
         }
 
-        Dua p = getItem(position);
+        final Dua p = getItem(position);
         if (p != null) {
             mHolder.tvReference.setText("" + p.getReference());
             mHolder.tvDuaName.setText(p.getTitle());
+            
+            if (p.getFav()) {
+                mHolder.btnFav.setText("{faw-star}");
+            } else {
+                mHolder.btnFav.setText("{faw-star-o}");
+            }
+
+            mHolder.btnFav.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean newFavStatus = !p.getFav();
+                    updateGroupFavStatus(p.getReference(), newFavStatus);
+                    p.setFav(newFavStatus);
+                    notifyDataSetChanged();
+                }
+            });
 
             String filter = mSearchText.toString();
             String itemValue = mHolder.tvDuaName.getText().toString();
 
             int startPos = itemValue.toLowerCase(Locale.US).indexOf(filter.toLowerCase(Locale.US));
-            int endPos = startPos + filter.length();
 
-            if (startPos != -1) { // This should always be true, just a sanity check
+            if (startPos != -1 && filter.length() > 0) {
                 Spannable spannable = new SpannableString(itemValue);
+                // Highlight logic could be added here if needed, but keeping it simple as per original
                 mHolder.tvDuaName.setText(spannable);
             } else {
                 mHolder.tvDuaName.setText(itemValue);
@@ -138,9 +163,23 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
         return convertView;
     }
 
+    private void updateGroupFavStatus(int groupId, boolean isFav) {
+        ExternalDbOpenHelper helper = ExternalDbOpenHelper.getInstance(mContext);
+        SQLiteDatabase db = helper.openDataBase();
+        
+        ContentValues values = new ContentValues();
+        values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
+        
+        db.update(HisnDatabaseInfo.DuaTable.TABLE_NAME, 
+                values, 
+                HisnDatabaseInfo.DuaTable.GROUP_ID + " = ?", 
+                new String[]{String.valueOf(groupId)});
+    }
+
     public static class ViewHolder {
         TextView tvDuaName;
         TextView tvReference;
+        IconicsButton btnFav;
         GradientDrawable shape;
     }
 }

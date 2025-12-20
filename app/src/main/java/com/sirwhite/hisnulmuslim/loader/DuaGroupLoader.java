@@ -22,28 +22,28 @@ public class DuaGroupLoader extends AbstractQueryLoader<List<Dua>> {
 
     @Override
     public List<Dua> loadInBackground() {
-
-
-
         List<Dua> results = null;
         Cursor duaGroupCursor = null;
         try {
             final SQLiteDatabase database = mDbHelper.getDb();
-            duaGroupCursor = database.query(HisnDatabaseInfo.DuaGroupTable.TABLE_NAME,
-                    new String[]{HisnDatabaseInfo.DuaGroupTable._ID,
-                            HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE},
-                    null,
-                    null,
-                    null,
-                    null,
-                    HisnDatabaseInfo.DuaGroupTable._ID);
+            // Query to get groups and a flag if any dua in that group is faved
+            String query = "SELECT g." + HisnDatabaseInfo.DuaGroupTable._ID + ", " +
+                    "g." + HisnDatabaseInfo.DuaGroupTable.ENGLISH_TITLE + ", " +
+                    "(SELECT COUNT(*) FROM " + HisnDatabaseInfo.DuaTable.TABLE_NAME + 
+                    " WHERE " + HisnDatabaseInfo.DuaTable.GROUP_ID + " = g." + HisnDatabaseInfo.DuaGroupTable._ID + 
+                    " AND " + HisnDatabaseInfo.DuaTable.FAV + " = 1) as fav_count " +
+                    "FROM " + HisnDatabaseInfo.DuaGroupTable.TABLE_NAME + " g " +
+                    "ORDER BY g." + HisnDatabaseInfo.DuaGroupTable._ID;
+            
+            duaGroupCursor = database.rawQuery(query, null);
 
             if (duaGroupCursor != null && duaGroupCursor.moveToFirst()) {
                 results = new ArrayList<>();
                 do {
                     int dua_group_id = duaGroupCursor.getInt(0);
                     String dua_group_title = duaGroupCursor.getString(1);
-                    results.add(new Dua(dua_group_id, dua_group_title));
+                    boolean is_faved = duaGroupCursor.getInt(2) > 0;
+                    results.add(new Dua(dua_group_id, dua_group_title, is_faved));
                 } while (duaGroupCursor.moveToNext());
             }
         } finally {
