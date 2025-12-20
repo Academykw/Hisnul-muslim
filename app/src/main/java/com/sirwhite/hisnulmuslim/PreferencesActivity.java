@@ -1,12 +1,14 @@
 package com.sirwhite.hisnulmuslim;
 
 import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.view.MenuItem;
 import android.view.View;
 
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -35,11 +37,45 @@ public class PreferencesActivity extends AppCompatActivity {
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragment {
+    public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("pref_key_theme")) {
+                String themePref = sharedPreferences.getString(key, "system");
+                int mode;
+                switch (themePref) {
+                    case "light":
+                        mode = AppCompatDelegate.MODE_NIGHT_NO;
+                        break;
+                    case "dark":
+                        mode = AppCompatDelegate.MODE_NIGHT_YES;
+                        break;
+                    default:
+                        mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+                        break;
+                }
+                AppCompatDelegate.setDefaultNightMode(mode);
+            }
         }
     }
 

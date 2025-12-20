@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ListPreference
+        android:defaultValue="system"
+        android:entries="@array/pref_theme_entries"
+        android:entryValues="@array/pref_theme_values"
+        android:key="pref_key_theme"
+        android:summary="@string/pref_theme_summary"
+        android:title="@string/pref_theme_title" />
+
     <PreferenceCategory android:title="@string/pref_category_font">
         <com.vanniktech.vntfontlistpreference.VNTFontListPreference
             xmlns:vntfontlistpreference="http://schemas.android.com/apk/res-auto"
