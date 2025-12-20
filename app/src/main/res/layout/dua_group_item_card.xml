@@ -32,6 +32,7 @@
         android:fontFamily="sans-serif"
         android:gravity="center_vertical"
         android:text="Entering the Bathroom"
+        android:textColor="#242121"
         android:textSize="16sp" />
 
     <com.mikepenz.iconics.view.IconicsButton
@@ -42,7 +43,7 @@
         android:layout_marginEnd="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="{faw-star-o}"
-        android:textColor="@color/nightModeColorPrimary"
+        android:textColor="@color/colorPrimary"
         android:textSize="24sp" />
 
 </LinearLayout>

@@ -183,7 +183,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         if (back_pressed + 1000 > System.currentTimeMillis()){
-           // LoaddAdss();
+
             super.onBackPressed();
         }
         else{
