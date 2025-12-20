@@ -7,7 +7,7 @@
 
     <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/card_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="12dp"
@@ -55,7 +55,7 @@
 
                 <com.mikepenz.iconics.view.IconicsButton
                     android:id="@+id/button_star"
-                    android:visibility="invisible"
+                    android:visibility="visible"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_alignParentRight="true"

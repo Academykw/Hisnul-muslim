@@ -16,9 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import com.google.android.gms.ads.AdView;
 
-import com.google.android.gms.ads.interstitial.InterstitialAd;
 
 
 import com.sirwhite.hisnulmuslim.adapter.DuaDetailAdapter;
@@ -39,9 +37,6 @@ public class DuaDetailActivity extends AppCompatActivity
     private Toolbar toolbar;
     private TextView my_toolbar_duaGroup_number;
     private TextView my_autofit_toolbar_title;
-    private AdView mAdView;
-
-    InterstitialAd interstitialAd;
 
 
 

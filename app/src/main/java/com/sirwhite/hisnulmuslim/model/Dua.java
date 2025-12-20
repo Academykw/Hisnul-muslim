@@ -37,6 +37,12 @@ public class Dua {
         this.title = title;
     }
 
+    public Dua(int reference, String title, boolean fav){
+        this.reference = reference;
+        this.title = title;
+        this.fav = fav;
+    }
+
     public int getReference() {
         return reference;
     }
