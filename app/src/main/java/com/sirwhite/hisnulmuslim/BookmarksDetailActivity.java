@@ -14,11 +14,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.sirwhite.hisnulmuslim.adapter.BookmarksDetailAdapter;
 import com.sirwhite.hisnulmuslim.adapter.BookmarksDetailRecycleAdapter;
 import com.sirwhite.hisnulmuslim.loader.BookmarkDetailsLoader;

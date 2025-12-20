@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.sirwhite.hisnulmuslim.R;
 import com.sirwhite.hisnulmuslim.model.Dua;
+import com.mikepenz.iconics.view.IconicsButton;
 
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +62,7 @@ public class BookmarksGroupAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.tvReference = (TextView) convertView.findViewById(R.id.txtReference);
             holder.tvDuaName = (TextView) convertView.findViewById(R.id.txtDuaName);
+            holder.btnFav = (IconicsButton) convertView.findViewById(R.id.button_star_group);
             holder.shape = (GradientDrawable) holder.tvReference.getBackground();
             convertView.setTag(holder);
         } else
@@ -70,14 +72,17 @@ public class BookmarksGroupAdapter extends BaseAdapter {
         if (p != null) {
             holder.tvReference.setText("" + p.getReference());
             holder.tvDuaName.setText(p.getTitle());
+            
+            // Hide the favorite button in the bookmarks group list to avoid confusion, 
+            // as these are groups that contain bookmarks.
+            holder.btnFav.setVisibility(View.GONE);
 
             String filter = mSearchText.toString();
             String itemValue = holder.tvDuaName.getText().toString();
 
             int startPos = itemValue.toLowerCase(Locale.US).indexOf(filter.toLowerCase(Locale.US));
-            int endPos = startPos + filter.length();
 
-            if (startPos != -1) { // This should always be true, just a sanity check
+            if (startPos != -1 && filter.length() > 0) {
                 Spannable spannable = new SpannableString(itemValue);
                 holder.tvDuaName.setText(spannable);
             } else {
@@ -90,6 +95,7 @@ public class BookmarksGroupAdapter extends BaseAdapter {
     public static class ViewHolder {
         TextView tvDuaName;
         TextView tvReference;
+        IconicsButton btnFav;
         GradientDrawable shape;
     }
 }
