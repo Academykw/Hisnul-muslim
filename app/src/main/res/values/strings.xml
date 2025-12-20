@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Hisnul Muslim</string>
-    <string name="app_name_about" translatable="false">Hisnul Muslim App</string>
-    <string name="version_name" translatable="false">Version 1.2.1</string>
+    <string name="app_name">Deen Adkhar</string>
+    <string name="app_name_about" translatable="false">Deen Adkhar App</string>
+    <string name="version_name" translatable="false">Version 1.0.0</string>
     <string name="beta_version" translatable="false">0.06 - RecyclerView</string>
 
     <string name="action_search">Search</string>
@@ -20,7 +20,7 @@
     <string name="title_activity_preferences">Settings</string>
     <string name="about_us" translatable="false">
         <![CDATA[
-            Hisnul Muslim is a collection of supplications for various occasions compiled by  Aliu usman. The author is from amongst the senior students of the former Grand Mufti of Saudi Arabia, Shaykh Abdul Aziz bin Abdullah bin Baz (May Allah have mercy on him).
+            Deen Adkhar is a collection of supplications for various occasions compiled by  Aliu usman. The author is from amongst the senior students of the former Grand Mufti of Saudi Arabia, Shaykh Abdul Aziz bin Abdullah bin Baz (May Allah have mercy on him).
             <br/><br/>
             <big><b>Contributors</b></big><br/>
            Aliu usman (<a href="https://twitter.com/bin_ali40?t=zj8vCxuyU6wWFJEmiuLIXw&s=09">@ausman</a>)<br/>
@@ -36,18 +36,7 @@
     <string name="action_share_credit" translatable="false">via @HisnulMuslimApp</string>
 
 
-<!--    <string name="AdMob_AppId" translatable="false">ca-app-pub-1710576803036100~8000842544</string>-->
-<!--    <string name="AdMob_Banner" translatable="false">ca-app-pub-1710576803036100/7124280112</string>-->
 
-<!--    <string name="AdMob_Interstitial" translatable="false">ca-app-pub-1710576803036100/5314969453</string>-->
-
-
-    <!--  test admob-->
-        <string name="AdMob_AppId" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
-        <string name="AdMob_Banner" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-        <string name="AdMob_Native" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
-        <string name="AdMob_Interstitial" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
-        <string name="AdMob_OpenApp" translatable="false">ca-app-pub-3940256099942544/3419835294</string>
 
 
     <string name="button_share_icon" translatable="false"></string>

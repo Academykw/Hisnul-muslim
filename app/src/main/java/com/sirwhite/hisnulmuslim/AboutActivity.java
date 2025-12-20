@@ -10,11 +10,6 @@ import android.view.View;
 import android.widget.TextView;
 
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -29,12 +24,6 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
 
 
-
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
 
 
         toolbar = (Toolbar) findViewById(R.id.my_action_bar);
