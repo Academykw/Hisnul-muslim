@@ -25,10 +25,11 @@
                 android:paddingTop="10dp">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/about_icon" />
+                    android:src="@drawable/ic_download"
+                    android:layout_marginBottom="20dp"/>
 
                 <TextView
                     android:id="@+id/tvAppName"
