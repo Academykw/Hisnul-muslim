@@ -1,7 +1,7 @@
-package com.sirwhite.hisnulmuslim.loader;
+package com.deen.adkhar.loader;
 
 import android.content.Context;
-import com.sirwhite.hisnulmuslim.database.ExternalDbOpenHelper;
+import com.deen.adkhar.database.ExternalDbOpenHelper;
 import androidx.loader.content.AsyncTaskLoader;
 
 public abstract class AbstractQueryLoader<T> extends AsyncTaskLoader<T> {

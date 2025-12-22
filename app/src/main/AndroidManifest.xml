@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sirwhite.hisnulmuslim"
+    package="com.deen.adkhar"
     android:versionCode="1"
     android:versionName="@string/version_name">
 
@@ -58,7 +58,7 @@
             android:parentActivityName=".DuaGroupActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.sirwhite.hisnulmuslim.DuaGroupActivity" />
+                android:value=".DuaGroupActivity" />
         </activity>
         <activity
             android:name=".BookmarksGroupActivity"
@@ -66,7 +66,7 @@
             android:parentActivityName=".DuaGroupActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.sirwhite.hisnulmuslim.DuaGroupActivity" />
+                android:value=".DuaGroupActivity" />
         </activity>
         <activity
             android:name=".BookmarksDetailActivity"
