@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim;
+package com.deen.adkhar;
 
 import android.os.Build;
 import android.content.SharedPreferences;

@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 34
+    namespace = "com.deen.adkhar"
+    compileSdkVersion 35
 
     compileOptions {
         encoding "UTF-8"
@@ -14,8 +15,8 @@ android {
         applicationId "com.deen.adkhar"
         minSdkVersion 21
         //noinspection OldTargetApi
-        targetSdkVersion 34
-        versionCode 21
+        targetSdkVersion 35
+        versionCode 1
         versionName "1.1"
         multiDexEnabled true
     }
