@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim.database;
+package com.deen.adkhar.database;
 
 import android.provider.BaseColumns;
 

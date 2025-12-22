@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim.database;
+package com.deen.adkhar.database;
 
 import android.content.Context;
 import android.database.SQLException;
@@ -51,7 +51,7 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    //This piece of code will create a com.khalid.hisnulmuslim.database if it’s not yet created
+    //This piece of code will create a com.khalid.adkhar.database if it’s not yet created
     public void createDataBase() {
         boolean dbExist = checkDataBase();
         if (!dbExist) {
@@ -60,14 +60,14 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
                 copyDataBase();
             } catch (IOException e) {
                 Log.e(this.getClass().toString(), "Copying error");
-                throw new Error("Error copying com.khalid.hisnulmuslim.database!");
+                throw new Error("Error copying com.khalid.adkhar.database!");
             }
         } else {
             Log.i(this.getClass().toString(), "Database already exists");
         }
     }
 
-    //Performing a com.khalid.hisnulmuslim.database existence check
+    //Performing a com.khalid.adkhar.database existence check
     private boolean checkDataBase() {
         SQLiteDatabase checkDb = null;
         try {
@@ -85,19 +85,19 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
         return checkDb != null;
     }
 
-    //Method for copying the com.khalid.hisnulmuslim.database
+    //Method for copying the com.khalid.adkhar.database
     private void copyDataBase() throws IOException {
-        //Open a stream for reading from our ready-made com.khalid.hisnulmuslim.database
+        //Open a stream for reading from our ready-made com.khalid.adkhar.database
         //The stream source is located in the assets
         InputStream externalDbStream = context.getAssets().open(DB_NAME);
 
-        //Path to the created empty com.khalid.hisnulmuslim.database on your Android device
+        //Path to the created empty com.khalid.adkhar.database on your Android device
         String outFileName = DB_PATH + DB_NAME;
 
-        //Now create a stream for writing the com.khalid.hisnulmuslim.database byte by byte
+        //Now create a stream for writing the com.khalid.adkhar.database byte by byte
         OutputStream localDbStream = new FileOutputStream(outFileName);
 
-        //Copying the com.khalid.hisnulmuslim.database
+        //Copying the com.khalid.adkhar.database
         byte[] buffer = new byte[1024];
         int bytesRead;
         while ((bytesRead = externalDbStream.read(buffer)) > 0) {
