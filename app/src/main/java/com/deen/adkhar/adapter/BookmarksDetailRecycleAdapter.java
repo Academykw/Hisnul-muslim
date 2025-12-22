@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim.adapter;
+package com.deen.adkhar.adapter;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,24 +8,20 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 
-import com.sirwhite.hisnulmuslim.R;
-import com.sirwhite.hisnulmuslim.database.ExternalDbOpenHelper;
-import com.sirwhite.hisnulmuslim.database.HisnDatabaseInfo;
-import com.sirwhite.hisnulmuslim.model.Dua;
+import com.deen.adkhar.R;
+import com.deen.adkhar.database.ExternalDbOpenHelper;
+import com.deen.adkhar.database.HisnDatabaseInfo;
+import com.deen.adkhar.model.Dua;
 import com.mikepenz.iconics.view.IconicsButton;
 
 import java.util.List;
 
-import androidx.annotation.UiThread;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**

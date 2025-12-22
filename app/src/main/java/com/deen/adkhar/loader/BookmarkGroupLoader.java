@@ -1,10 +1,10 @@
-package com.sirwhite.hisnulmuslim.loader;
+package com.deen.adkhar.loader;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.sirwhite.hisnulmuslim.model.Dua;
+import com.deen.adkhar.model.Dua;
 
 import java.util.ArrayList;
 import java.util.List;

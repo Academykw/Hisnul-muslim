@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim;
+package com.deen.adkhar;
 
 import android.content.Intent;
 import android.os.Build;
@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.sirwhite.hisnulmuslim.adapter.BookmarksDetailAdapter;
-import com.sirwhite.hisnulmuslim.adapter.BookmarksDetailRecycleAdapter;
-import com.sirwhite.hisnulmuslim.loader.BookmarkDetailsLoader;
-import com.sirwhite.hisnulmuslim.model.Dua;
+import com.deen.adkhar.adapter.BookmarksDetailAdapter;
+import com.deen.adkhar.adapter.BookmarksDetailRecycleAdapter;
+import com.deen.adkhar.loader.BookmarkDetailsLoader;
+import com.deen.adkhar.model.Dua;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim.adapter;
+package com.deen.adkhar.adapter;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -20,10 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.sirwhite.hisnulmuslim.R;
-import com.sirwhite.hisnulmuslim.database.ExternalDbOpenHelper;
-import com.sirwhite.hisnulmuslim.database.HisnDatabaseInfo;
-import com.sirwhite.hisnulmuslim.model.Dua;
+import com.deen.adkhar.R;
+import com.deen.adkhar.database.ExternalDbOpenHelper;
+import com.deen.adkhar.database.HisnDatabaseInfo;
+import com.deen.adkhar.model.Dua;
 import com.mikepenz.iconics.view.IconicsButton;
 
 import java.util.List;
