@@ -8,7 +8,7 @@ This repository is about an Android app which would include all the dua from His
 best Hisnul Muslim app the Play Store has ever seen, in terms of usability and performance.
 
 
-![](https://play.google.com/store/apps/details?id=com.sirwhite.hisnulmuslim)
+![](https://play.google.com/store/apps/details?id=deen.hisnulmuslim)
 
 # Requirements
 

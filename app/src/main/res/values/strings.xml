@@ -11,7 +11,7 @@
     <string name="action_about">About</string>
     <string name="action_night_mode">Night Mode</string>
     <string name="duaDetailFragment" translatable="false">Dua Detail Fragment</string>
-    <string name="title_activity_dua_list">Hisnul Muslim</string>
+    <string name="title_activity_dua_list">Deen Adkhar</string>
     <string name="title_activity_dua_detail" translatable="false">DuaDetail</string>
     <string name="title_activity_about">About</string>
     <string name="hello_world" translatable="false">Hello world!</string>
@@ -33,7 +33,7 @@
 
     <string name="bookmarks_none" translatable="false">You have no bookmarks yet.</string>
     <string name="action_share_title" translatable="false">Share Dua</string>
-    <string name="action_share_credit" translatable="false">via @HisnulMuslimApp</string>
+    <string name="action_share_credit" translatable="false">via @HDeenAdkharApp</string>
 
 
 
