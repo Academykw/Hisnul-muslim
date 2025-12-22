@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim.model;
+package com.deen.adkhar.model;
 
 public class Dua {
     private boolean fav;

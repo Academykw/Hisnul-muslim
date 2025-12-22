@@ -1,4 +1,4 @@
-package com.sirwhite.hisnulmuslim;
+package com.deen.adkhar;
 
 import android.content.Intent;
 import android.os.Build;
@@ -10,9 +10,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 
-import com.sirwhite.hisnulmuslim.adapter.BookmarksGroupAdapter;
-import com.sirwhite.hisnulmuslim.loader.BookmarkGroupLoader;
-import com.sirwhite.hisnulmuslim.model.Dua;
+import com.deen.adkhar.adapter.BookmarksGroupAdapter;
+import com.deen.adkhar.loader.BookmarkGroupLoader;
+import com.deen.adkhar.model.Dua;
 
 import java.util.List;
 
