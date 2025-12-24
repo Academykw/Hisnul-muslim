@@ -4,8 +4,6 @@ package com.deen.adkhar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +16,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
@@ -40,30 +41,19 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
     private static final int RC_APP_UPDATE = 100;
 
-
-
-
-
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dua_group);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        View rootView = findViewById(R.id.root_dua_group);
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return windowInsets;
+        });
 
         toolbar = (Toolbar) findViewById(R.id.my_action_bar);
-        View mToolbarShadow = findViewById(R.id.view_toolbar_shadow);
         setSupportActionBar(toolbar);
 
         mListView = (ListView) findViewById(R.id.duaListView);
@@ -71,7 +61,6 @@ public class DuaGroupActivity extends AppCompatActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                //LoaddAdss();
                 Intent intent;
                 intent = new Intent(getBaseContext(),
                         DuaDetailActivity.class);
@@ -87,18 +76,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
             }
         });
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            mToolbarShadow.setVisibility(View.GONE);
-        }
-
-/*
-        // For Beta Testing
-        Resources resource = getResources();
-        String beta_version = resource.getString(R.string.beta_version);
-        Toast.makeText(this, "Beta Version: " + beta_version, Toast.LENGTH_SHORT).show();
-        // End of Beta Testing
-
-        getSupportLoaderManager().initLoader(0, null, this);*/
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -117,7 +95,9 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
                 @Override
                 public boolean onQueryTextChange(String s) {
-                    mAdapter.getFilter().filter(s);
+                    if (mAdapter != null) {
+                        mAdapter.getFilter().filter(s);
+                    }
                     return true;
                 }
             });
@@ -196,10 +176,8 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader<List<Dua>> loader) {
-        mAdapter.setData(null);
+        if (mAdapter != null) {
+            mAdapter.setData(null);
+        }
     }
-
-
-
-
 }
