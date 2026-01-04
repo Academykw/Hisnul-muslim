@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:descendantFocusability="beforeDescendants">
 
-    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,6 +83,34 @@
                 android:textColor="@color/material_sub_bg_text"
                 android:textSize="24sp" />
 
+            <com.mikepenz.iconics.view.IconicsButton
+                android:id="@+id/button_play"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="{gmd-play-arrow}"
+                android:textAllCaps="false"
+                android:textColor="@color/colorPrimary"
+                android:textSize="24sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:background="@color/card_divider_gray" />
+
+            <TextView
+                android:id="@+id/txtDuaTransliteration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
+                android:paddingTop="15dp"
+                android:textColor="@color/material_sub_bg_text"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -93,10 +121,9 @@
             <TextView
                 android:id="@+id/txtDuaTranslation"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
-                android:text="Dua Reference"
                 android:textColor="@color/material_sub_bg_text"
                 android:textSize="16sp" />
 

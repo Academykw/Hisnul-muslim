@@ -5,6 +5,7 @@ public class Dua {
     private String title;
     private String arabic;
     private String translation;
+    private String transliteration;
     private int reference;
 
     private String book_reference;
@@ -15,6 +16,15 @@ public class Dua {
         this.reference = reference;
         this.arabic = arabic;
         this.translation = translation;
+        this.book_reference = book_reference;
+        this.fav = fav;
+    }
+
+    public Dua (int reference, boolean fav, String arabic, String translation, String transliteration, String book_reference){
+        this.reference = reference;
+        this.arabic = arabic;
+        this.translation = translation;
+        this.transliteration = transliteration;
         this.book_reference = book_reference;
         this.fav = fav;
     }
@@ -77,6 +87,14 @@ public class Dua {
 
     public void setTranslation(String translation) {
         this.translation = translation;
+    }
+
+    public String getTransliteration() {
+        return transliteration;
+    }
+
+    public void setTransliteration(String transliteration) {
+        this.transliteration = transliteration;
     }
 
     public String getBook_reference() {
