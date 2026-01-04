@@ -49,7 +49,7 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 final ExternalDbOpenHelper helper = ExternalDbOpenHelper.getInstance(mContext);
-                final SQLiteDatabase db = helper.openDataBase();
+                final SQLiteDatabase db = helper.getDb();
 
                 final List<Dua> duas = new ArrayList<>();
                 Cursor c = null;
@@ -71,6 +71,8 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
                             duas.add(dua);
                         } while (c.moveToNext());
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 } finally {
                     if (c != null) {
                         c.close();
@@ -86,7 +88,7 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
             @Override
             protected void publishResults(CharSequence constraint, Filter.FilterResults results) {
                 mSearchText = constraint;
-                if (results.count > 0) {
+                if (results != null && results.count > 0) {
                     mList = (List<Dua>) results.values;
                     notifyDataSetChanged();
                 } else {
@@ -120,7 +122,9 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
             mHolder.tvReference = (TextView) convertView.findViewById(R.id.txtReference);
             mHolder.tvDuaName = (TextView) convertView.findViewById(R.id.txtDuaName);
             mHolder.btnFav = (IconicsButton) convertView.findViewById(R.id.button_star_group);
-            mHolder.shape = (GradientDrawable) mHolder.tvReference.getBackground();
+            if (mHolder.tvReference.getBackground() instanceof GradientDrawable) {
+                mHolder.shape = (GradientDrawable) mHolder.tvReference.getBackground();
+            }
             convertView.setTag(mHolder);
         } else {
             mHolder = (ViewHolder) convertView.getTag();
@@ -154,7 +158,6 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
 
             if (startPos != -1 && filter.length() > 0) {
                 Spannable spannable = new SpannableString(itemValue);
-                // Highlight logic could be added here if needed, but keeping it simple as per original
                 mHolder.tvDuaName.setText(spannable);
             } else {
                 mHolder.tvDuaName.setText(itemValue);
@@ -165,7 +168,7 @@ public class DuaGroupAdapter extends BaseAdapter implements Filterable {
 
     private void updateGroupFavStatus(int groupId, boolean isFav) {
         ExternalDbOpenHelper helper = ExternalDbOpenHelper.getInstance(mContext);
-        SQLiteDatabase db = helper.openDataBase();
+        SQLiteDatabase db = helper.getDb();
         
         ContentValues values = new ContentValues();
         values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
