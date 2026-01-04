@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +43,10 @@ public class DuaDetailAdapter extends BaseAdapter {
 
     private String myToolbarTitle;
     private MediaPlayer mediaPlayer;
+    private int playingReference = -1;
+    private Handler mHandler = new Handler();
+    private SeekBar activeSeekBar;
+    private IconicsButton activePlayButton;
 
     public DuaDetailAdapter(Context context, List<Dua> items, String toolbarTitle) {
         mContext = context;
@@ -110,6 +116,7 @@ public class DuaDetailAdapter extends BaseAdapter {
             mHolder.tvDuaArabic.setTextSize(prefArabicFontSize);
 
             mHolder.btnPlay = (IconicsButton) convertView.findViewById(R.id.button_play);
+            mHolder.seekBar = (SeekBar) convertView.findViewById(R.id.audioSeekBar);
 
             mHolder.tvDuaTransliteration = (TextView) convertView.findViewById(R.id.txtDuaTransliteration);
             mHolder.tvDuaTransliteration.setTextSize(prefOtherFontSize);
@@ -198,11 +205,49 @@ public class DuaDetailAdapter extends BaseAdapter {
                 mHolder.favButton.setText("{faw-star-o}");
             }
 
+            // Sync UI state for playing item
+            if (playingReference == p.getReference()) {
+                activeSeekBar = mHolder.seekBar;
+                activePlayButton = mHolder.btnPlay;
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    mHolder.btnPlay.setText("{gmd-pause}");
+                    mHolder.seekBar.setMax(mediaPlayer.getDuration());
+                    mHolder.seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                } else {
+                    mHolder.btnPlay.setText("{gmd-play-arrow}");
+                }
+            } else {
+                mHolder.btnPlay.setText("{gmd-play-arrow}");
+                mHolder.seekBar.setProgress(0);
+            }
+
             mHolder.btnPlay.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    playAudio(p.getReference());
+                    if (playingReference == p.getReference() && mediaPlayer != null) {
+                        if (mediaPlayer.isPlaying()) {
+                            mediaPlayer.pause();
+                            mHolder.btnPlay.setText("{gmd-play-arrow}");
+                        } else {
+                            mediaPlayer.start();
+                            mHolder.btnPlay.setText("{gmd-pause}");
+                            updateSeekBar();
+                        }
+                    } else {
+                        playAudio(p.getReference(), mHolder.seekBar, mHolder.btnPlay);
+                    }
                 }
+            });
+
+            mHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (fromUser && playingReference == p.getReference() && mediaPlayer != null) {
+                        mediaPlayer.seekTo(progress);
+                    }
+                }
+                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
 
@@ -210,10 +255,15 @@ public class DuaDetailAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void playAudio(int reference) {
+    private void playAudio(final int reference, final SeekBar seekBar, final IconicsButton playButton) {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+
+        // Reset previous playing state if exists
+        if (playingReference != -1) {
+            notifyDataSetChanged();
         }
 
         String fileName = "a" + reference + ".mp3";
@@ -226,30 +276,71 @@ public class DuaDetailAdapter extends BaseAdapter {
                             .build()
             );
             
-            // Assuming audio files are in assets/audio/
             android.content.res.AssetFileDescriptor afd = mContext.getAssets().openFd("audio/" + fileName);
             mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
             
             mediaPlayer.prepare();
-            mediaPlayer.start();
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.start();
+                    playingReference = reference;
+                    activeSeekBar = seekBar;
+                    activePlayButton = playButton;
+                    seekBar.setMax(mp.getDuration());
+                    playButton.setText("{gmd-pause}");
+                    updateSeekBar();
+                }
+            });
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    playingReference = -1;
+                    playButton.setText("{gmd-play-arrow}");
+                    seekBar.setProgress(0);
+                    mHandler.removeCallbacks(updater);
+                }
+            });
+
         } catch (IOException e) {
             Log.e("DuaDetailAdapter", "Error playing audio: " + fileName, e);
             Toast.makeText(mContext, "Audio not found for this Dua", Toast.LENGTH_SHORT).show();
+            playingReference = -1;
         }
     }
+
+    private void updateSeekBar() {
+        mHandler.postDelayed(updater, 100);
+    }
+
+    private Runnable updater = new Runnable() {
+        @Override
+        public void run() {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                if (activeSeekBar != null) {
+                    activeSeekBar.setProgress(mediaPlayer.getCurrentPosition());
+                }
+                mHandler.postDelayed(this, 100);
+            }
+        }
+    };
 
     public void releaseMediaPlayer() {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        mHandler.removeCallbacks(updater);
+        playingReference = -1;
     }
 
     public static class ViewHolder {
         TextView tvDuaNumber;
         TextView tvDuaArabic;
         IconicsButton btnPlay;
+        SeekBar seekBar;
         TextView tvDuaTransliteration;
         TextView tvDuaReference;
         TextView tvDuaTranslation;

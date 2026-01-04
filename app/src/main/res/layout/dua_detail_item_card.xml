@@ -83,16 +83,28 @@
                 android:textColor="@color/material_sub_bg_text"
                 android:textSize="24sp" />
 
-            <com.mikepenz.iconics.view.IconicsButton
-                android:id="@+id/button_play"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_gravity="center_horizontal"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:text="{gmd-play-arrow}"
-                android:textAllCaps="false"
-                android:textColor="@color/colorPrimary"
-                android:textSize="24sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.mikepenz.iconics.view.IconicsButton
+                    android:id="@+id/button_play"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:text="{gmd-play-arrow}"
+                    android:textAllCaps="false"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="24sp" />
+
+                <SeekBar
+                    android:id="@+id/audioSeekBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

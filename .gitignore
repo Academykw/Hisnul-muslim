@@ -42,3 +42,9 @@ captures/
 
 # Keystore files
 *.jks
+
+# Database files
+hisnul.sqlite3
+*.sqlite
+*.sqlite3
+*.db
