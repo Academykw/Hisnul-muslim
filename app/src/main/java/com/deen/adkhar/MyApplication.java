@@ -6,11 +6,18 @@ import android.preference.PreferenceManager;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.iconics.Iconics;
+
 public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
         
+        // Register Icon Fonts
+        Iconics.init(getApplicationContext());
+        Iconics.registerFont(new FontAwesome());
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String themePref = sharedPreferences.getString("pref_key_theme", "system");
         
