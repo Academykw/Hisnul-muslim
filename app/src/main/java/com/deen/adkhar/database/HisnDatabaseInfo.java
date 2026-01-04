@@ -4,7 +4,7 @@ import android.provider.BaseColumns;
 
 public class HisnDatabaseInfo {
     public static final String DB_NAME = "hisnul.sqlite3";
-    public static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 2;
 
     public static final class DuaGroupTable implements BaseColumns {
         public static final String TABLE_NAME = "dua_group";
@@ -21,6 +21,7 @@ public class HisnDatabaseInfo {
         public static final String ARABIC_DUA = "ar_dua";
         public static final String ARABIC_REFERENCE = "ar_reference";
         public static final String ENGLISH_TRANSLATION = "en_translation";
+        public static final String ENGLISH_TRANSLITERATION = "en_transliteration";
         public static final String ENGLISH_REFERENCE = "en_reference";
     }
 }
