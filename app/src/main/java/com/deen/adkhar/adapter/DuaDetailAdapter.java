@@ -6,13 +6,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.deen.adkhar.R;
@@ -21,6 +25,7 @@ import com.deen.adkhar.database.HisnDatabaseInfo;
 import com.deen.adkhar.model.Dua;
 import com.mikepenz.iconics.view.IconicsButton;
 
+import java.io.IOException;
 import java.util.List;
 
 public class DuaDetailAdapter extends BaseAdapter {
@@ -28,14 +33,17 @@ public class DuaDetailAdapter extends BaseAdapter {
 
     private List<Dua> mList;
     private LayoutInflater mInflater;
+    private Context mContext;
 
     private final float prefArabicFontSize;
     private final float prefOtherFontSize;
     private final String prefArabicFontTypeface;
 
     private String myToolbarTitle;
+    private MediaPlayer mediaPlayer;
 
     public DuaDetailAdapter(Context context, List<Dua> items, String toolbarTitle) {
+        mContext = context;
         mInflater = LayoutInflater.from(context);
         mList = items;
 
@@ -101,6 +109,11 @@ public class DuaDetailAdapter extends BaseAdapter {
             mHolder.tvDuaArabic.setTypeface(sCachedTypeface);
             mHolder.tvDuaArabic.setTextSize(prefArabicFontSize);
 
+            mHolder.btnPlay = (IconicsButton) convertView.findViewById(R.id.button_play);
+
+            mHolder.tvDuaTransliteration = (TextView) convertView.findViewById(R.id.txtDuaTransliteration);
+            mHolder.tvDuaTransliteration.setTextSize(prefOtherFontSize);
+
             mHolder.tvDuaTranslation = (TextView) convertView.findViewById(R.id.txtDuaTranslation);
             mHolder.tvDuaTranslation.setTextSize(prefOtherFontSize);
 
@@ -117,6 +130,7 @@ public class DuaDetailAdapter extends BaseAdapter {
                     intent.putExtra(Intent.EXTRA_TEXT,
                             myToolbarTitle + "\n\n" +
                                     mHolder.tvDuaArabic.getText() + "\n\n" +
+                                    mHolder.tvDuaTransliteration.getText() + "\n\n" +
                                     mHolder.tvDuaTranslation.getText() + "\n\n" +
                                     mHolder.tvDuaReference.getText() + "\n\n" +
                                     v.getResources().getString(R.string.action_share_credit)
@@ -163,6 +177,14 @@ public class DuaDetailAdapter extends BaseAdapter {
         if (p != null) {
             mHolder.tvDuaNumber.setText("" + p.getReference());
             mHolder.tvDuaArabic.setText(Html.fromHtml(p.getArabic()));
+
+            if (p.getTransliteration() != null) {
+                mHolder.tvDuaTransliteration.setVisibility(View.VISIBLE);
+                mHolder.tvDuaTransliteration.setText(Html.fromHtml(p.getTransliteration()));
+            } else {
+                mHolder.tvDuaTransliteration.setVisibility(View.GONE);
+            }
+
             mHolder.tvDuaTranslation.setText(Html.fromHtml(p.getTranslation()));
 
             if (p.getBook_reference() != null)
@@ -175,15 +197,60 @@ public class DuaDetailAdapter extends BaseAdapter {
             } else {
                 mHolder.favButton.setText("{faw-star-o}");
             }
+
+            mHolder.btnPlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    playAudio(p.getReference());
+                }
+            });
         }
 
 
         return convertView;
     }
 
+    private void playAudio(int reference) {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+        String fileName = "a" + reference + ".mp3";
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .build()
+            );
+            
+            // Assuming audio files are in assets/audio/
+            android.content.res.AssetFileDescriptor afd = mContext.getAssets().openFd("audio/" + fileName);
+            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            afd.close();
+            
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            Log.e("DuaDetailAdapter", "Error playing audio: " + fileName, e);
+            Toast.makeText(mContext, "Audio not found for this Dua", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void releaseMediaPlayer() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
     public static class ViewHolder {
         TextView tvDuaNumber;
         TextView tvDuaArabic;
+        IconicsButton btnPlay;
+        TextView tvDuaTransliteration;
         TextView tvDuaReference;
         TextView tvDuaTranslation;
         IconicsButton shareButton;

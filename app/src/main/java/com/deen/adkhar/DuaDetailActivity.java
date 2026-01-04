@@ -124,6 +124,22 @@ public class DuaDetailActivity extends AppCompatActivity
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (adapter != null) {
+            adapter.releaseMediaPlayer();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (adapter != null) {
+            adapter.releaseMediaPlayer();
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
