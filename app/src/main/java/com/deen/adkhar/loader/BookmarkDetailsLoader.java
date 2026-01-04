@@ -32,6 +32,7 @@ public class BookmarkDetailsLoader extends AbstractQueryLoader<List<Dua>> {
                             HisnDatabaseInfo.DuaTable.FAV,
                             HisnDatabaseInfo.DuaTable.ARABIC_DUA,
                             HisnDatabaseInfo.DuaTable.ENGLISH_TRANSLATION,
+                            HisnDatabaseInfo.DuaTable.ENGLISH_TRANSLITERATION,
                             HisnDatabaseInfo.DuaTable.ENGLISH_REFERENCE},
                     HisnDatabaseInfo.DuaTable.GROUP_ID + "=" + mGroup
                     + " AND " + HisnDatabaseInfo.DuaTable.FAV + "= 1"
@@ -44,8 +45,9 @@ public class BookmarkDetailsLoader extends AbstractQueryLoader<List<Dua>> {
                     boolean fav = duaDetailCursor.getInt(1) == 1;
                     String arabic = duaDetailCursor.getString(2);
                     String translation = duaDetailCursor.getString(3);
-                    String book_reference = duaDetailCursor.getString(4);
-                    results.add(new Dua(reference, fav, arabic, translation, book_reference));
+                    String transliteration = duaDetailCursor.getString(4);
+                    String book_reference = duaDetailCursor.getString(5);
+                    results.add(new Dua(reference, fav, arabic, translation, transliteration, book_reference));
                 } while (duaDetailCursor.moveToNext());
             }
         } finally {

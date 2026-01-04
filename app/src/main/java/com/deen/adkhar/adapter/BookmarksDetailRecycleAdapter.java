@@ -90,6 +90,13 @@ public class BookmarksDetailRecycleAdapter extends RecyclerView.Adapter<Bookmark
         holder.tvDuaNumber.setText(String.valueOf(p.getReference()));
         holder.tvDuaArabic.setText(Html.fromHtml(p.getArabic()));
 
+        if (p.getTransliteration() != null) {
+            holder.tvDuaTransliteration.setVisibility(View.VISIBLE);
+            holder.tvDuaTransliteration.setText(Html.fromHtml(p.getTransliteration()));
+        } else {
+            holder.tvDuaTransliteration.setVisibility(View.GONE);
+        }
+
         holder.tvDuaTranslation.setText(Html.fromHtml(p.getTranslation()));
 
         if (p.getBook_reference() != null)
@@ -110,6 +117,7 @@ public class BookmarksDetailRecycleAdapter extends RecyclerView.Adapter<Bookmark
                 intent.putExtra(Intent.EXTRA_TEXT,
                         myToolbarTitle + "\n\n" +
                                 holder.tvDuaArabic.getText() + "\n\n" +
+                                holder.tvDuaTransliteration.getText() + "\n\n" +
                                 holder.tvDuaTranslation.getText() + "\n\n" +
                                 holder.tvDuaReference.getText() + "\n\n" +
                                 v.getResources().getString(R.string.action_share_credit)
@@ -156,6 +164,7 @@ public class BookmarksDetailRecycleAdapter extends RecyclerView.Adapter<Bookmark
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvDuaNumber;
         public TextView tvDuaArabic;
+        public TextView tvDuaTransliteration;
         public TextView tvDuaTranslation;
         public TextView tvDuaReference;
         public IconicsButton shareButton;
@@ -165,6 +174,7 @@ public class BookmarksDetailRecycleAdapter extends RecyclerView.Adapter<Bookmark
             super(itemLayoutView);
             tvDuaNumber = (TextView) itemLayoutView.findViewById(R.id.txtDuaNumber);
             tvDuaArabic = (TextView) itemLayoutView.findViewById(R.id.txtDuaArabic);
+            tvDuaTransliteration = (TextView) itemLayoutView.findViewById(R.id.txtDuaTransliteration);
             tvDuaTranslation = (TextView) itemLayoutView.findViewById(R.id.txtDuaTranslation);
             tvDuaReference = (TextView) itemLayoutView.findViewById(R.id.txtDuaReference);
             shareButton = (IconicsButton) itemLayoutView.findViewById(R.id.button_share);
@@ -172,6 +182,7 @@ public class BookmarksDetailRecycleAdapter extends RecyclerView.Adapter<Bookmark
 
             tvDuaArabic.setTypeface(sCachedTypeface);
             tvDuaArabic.setTextSize(prefArabicFontSize);
+            tvDuaTransliteration.setTextSize(prefOtherFontSize);
             tvDuaTranslation.setTextSize(prefOtherFontSize);
             tvDuaReference.setTextSize(prefOtherFontSize);
         }
