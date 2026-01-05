@@ -1,6 +1,7 @@
 package com.deen.adkhar.database;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -19,6 +20,7 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
     //Database file name
     public static final String DB_NAME = HisnDatabaseInfo.DB_NAME;
     public static final int DB_VERSION = HisnDatabaseInfo.DB_VERSION;
+    private static final String SP_KEY_DB_VER = "db_ver";
 
     private static ExternalDbOpenHelper sInstance;
 
@@ -38,11 +40,8 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
     }
 
     private ExternalDbOpenHelper(Context context, String databaseName) {
-        super(context, databaseName, null, 1);
+        super(context, databaseName, null, DB_VERSION);
         this.context = context;
-        //Write a full path to the databases of your application
-        String packageName = context.getPackageName();
-//        DB_PATH = String.format("/data/data/%s/databases/", packageName);
         DB_PATH = context.getDatabasePath(getDatabaseName()).getAbsolutePath();
         openDataBase();
     }
@@ -51,68 +50,62 @@ public class ExternalDbOpenHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    //This piece of code will create a com.khalid.adkhar.database if it’s not yet created
+    //This piece of code will create a database if it’s not yet created or if version changed
     public void createDataBase() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("db_prefs", Context.MODE_PRIVATE);
+        int savedVersion = sharedPreferences.getInt(SP_KEY_DB_VER, 0);
+
         boolean dbExist = checkDataBase();
-        if (!dbExist) {
+        if (!dbExist || savedVersion < DB_VERSION) {
             this.getReadableDatabase();
             try {
                 copyDataBase();
+                sharedPreferences.edit().putInt(SP_KEY_DB_VER, DB_VERSION).apply();
+                Log.i(this.getClass().toString(), "Database copied/updated to version " + DB_VERSION);
             } catch (IOException e) {
                 Log.e(this.getClass().toString(), "Copying error");
-                throw new Error("Error copying com.khalid.adkhar.database!");
+                throw new Error("Error copying database!");
             }
         } else {
-            Log.i(this.getClass().toString(), "Database already exists");
+            Log.i(this.getClass().toString(), "Database already exists and is up to date");
         }
     }
 
-    //Performing a com.khalid.adkhar.database existence check
+    //Performing a database existence check
     private boolean checkDataBase() {
         SQLiteDatabase checkDb = null;
         try {
-            String path = DB_PATH + DB_NAME;
+            String path = DB_PATH;
             checkDb = SQLiteDatabase.openDatabase(path, null,
                     SQLiteDatabase.OPEN_READONLY);
         } catch (SQLException e) {
             Log.e(this.getClass().toString(), "Error while checking db");
         }
-        //Android doesn’t like resource leaks, everything should
-        // be closed
         if (checkDb != null) {
             checkDb.close();
         }
         return checkDb != null;
     }
 
-    //Method for copying the com.khalid.adkhar.database
+    //Method for copying the database
     private void copyDataBase() throws IOException {
-        //Open a stream for reading from our ready-made com.khalid.adkhar.database
-        //The stream source is located in the assets
         InputStream externalDbStream = context.getAssets().open(DB_NAME);
-
-        //Path to the created empty com.khalid.adkhar.database on your Android device
-        String outFileName = DB_PATH + DB_NAME;
-
-        //Now create a stream for writing the com.khalid.adkhar.database byte by byte
+        String outFileName = DB_PATH;
         OutputStream localDbStream = new FileOutputStream(outFileName);
 
-        //Copying the com.khalid.adkhar.database
         byte[] buffer = new byte[1024];
         int bytesRead;
         while ((bytesRead = externalDbStream.read(buffer)) > 0) {
             localDbStream.write(buffer, 0, bytesRead);
         }
-        //Don’t forget to close the streams
         localDbStream.close();
         externalDbStream.close();
     }
 
     public SQLiteDatabase openDataBase() throws SQLException {
-        String path = DB_PATH + DB_NAME;
-        if (database == null) {
+        if (database == null || !database.isOpen()) {
             createDataBase();
-            database = SQLiteDatabase.openDatabase(path, null,
+            database = SQLiteDatabase.openDatabase(DB_PATH, null,
                     SQLiteDatabase.OPEN_READWRITE);
         }
         return database;
