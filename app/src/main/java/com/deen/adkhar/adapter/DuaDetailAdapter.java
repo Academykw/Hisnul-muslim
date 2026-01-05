@@ -92,7 +92,7 @@ public class DuaDetailAdapter extends BaseAdapter {
 
     @Override
     public Dua getItem(int position) {
-        return mList.get(position);
+        return mList != null && position < mList.size() ? mList.get(position) : null;
     }
 
     @Override
@@ -110,132 +110,101 @@ public class DuaDetailAdapter extends BaseAdapter {
 
             mHolder = new ViewHolder();
             mHolder.tvDuaNumber = (TextView) convertView.findViewById(R.id.txtDuaNumber);
-
             mHolder.tvDuaArabic = (TextView) convertView.findViewById(R.id.txtDuaArabic);
-            mHolder.tvDuaArabic.setTypeface(sCachedTypeface);
-            mHolder.tvDuaArabic.setTextSize(prefArabicFontSize);
-
             mHolder.btnPlay = (IconicsButton) convertView.findViewById(R.id.button_play);
             mHolder.seekBar = (SeekBar) convertView.findViewById(R.id.audioSeekBar);
-
             mHolder.tvDuaTransliteration = (TextView) convertView.findViewById(R.id.txtDuaTransliteration);
-            mHolder.tvDuaTransliteration.setTextSize(prefOtherFontSize);
-
             mHolder.tvDuaTranslation = (TextView) convertView.findViewById(R.id.txtDuaTranslation);
-            mHolder.tvDuaTranslation.setTextSize(prefOtherFontSize);
-
             mHolder.tvDuaReference = (TextView) convertView.findViewById(R.id.txtDuaReference);
-            mHolder.tvDuaReference.setTextSize(prefOtherFontSize);
-
             mHolder.shareButton = (IconicsButton) convertView.findViewById(R.id.button_share);
             mHolder.favButton = (IconicsButton) convertView.findViewById(R.id.button_star);
 
-            mHolder.shareButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_SEND);
-                    intent.putExtra(Intent.EXTRA_TEXT,
-                            myToolbarTitle + "\n\n" +
-                                    mHolder.tvDuaArabic.getText() + "\n\n" +
-                                    mHolder.tvDuaTransliteration.getText() + "\n\n" +
-                                    mHolder.tvDuaTranslation.getText() + "\n\n" +
-                                    mHolder.tvDuaReference.getText() + "\n\n" +
-                                    v.getResources().getString(R.string.action_share_credit)
-                    );
-                    intent.setType("text/plain");
-                    v.getContext().startActivity(
-                            Intent.createChooser(
-                                    intent,
-                                    v.getResources().getString(R.string.action_share_title)
-                            )
-                    );
-                }
-            });
+            mHolder.tvDuaArabic.setTypeface(sCachedTypeface);
+            mHolder.tvDuaArabic.setTextSize(prefArabicFontSize);
+            mHolder.tvDuaTransliteration.setTextSize(prefOtherFontSize);
+            mHolder.tvDuaTranslation.setTextSize(prefOtherFontSize);
+            mHolder.tvDuaReference.setTextSize(prefOtherFontSize);
 
-            mHolder.favButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    boolean isFav = !p.getFav();
-                    SQLiteDatabase db = ExternalDbOpenHelper.getInstance(v.getContext()).getDb();
-
-                    ContentValues values = new ContentValues();
-                    values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
-
-                    String selection = HisnDatabaseInfo.DuaTable.DUA_ID + " = ?";
-                    String[] selectionArgs = {String.valueOf(p.getReference())};
-
-                    int count = db.update(
-                            HisnDatabaseInfo.DuaTable.TABLE_NAME,
-                            values,
-                            selection,
-                            selectionArgs);
-
-                    if (count == 1) {
-                        p.setFav(isFav);
-                        notifyDataSetChanged();
-                    }
-                }
-            });
             convertView.setTag(mHolder);
         } else {
             mHolder = (ViewHolder) convertView.getTag();
         }
 
-
         if (p != null) {
-            mHolder.tvDuaNumber.setText("" + p.getReference());
-            mHolder.tvDuaArabic.setText(Html.fromHtml(p.getArabic()));
-
-            if (p.getTransliteration() != null) {
+            mHolder.tvDuaNumber.setText(String.valueOf(p.getReference()));
+            
+            // Null safety for HTML parsing
+            mHolder.tvDuaArabic.setText(p.getArabic() != null ? Html.fromHtml(p.getArabic()) : "");
+            
+            if (p.getTransliteration() != null && !p.getTransliteration().isEmpty()) {
                 mHolder.tvDuaTransliteration.setVisibility(View.VISIBLE);
                 mHolder.tvDuaTransliteration.setText(Html.fromHtml(p.getTransliteration()));
             } else {
                 mHolder.tvDuaTransliteration.setVisibility(View.GONE);
             }
 
-            mHolder.tvDuaTranslation.setText(Html.fromHtml(p.getTranslation()));
+            mHolder.tvDuaTranslation.setText(p.getTranslation() != null ? Html.fromHtml(p.getTranslation()) : "");
 
             if (p.getBook_reference() != null)
                 mHolder.tvDuaReference.setText(Html.fromHtml(p.getBook_reference()));
             else
                 mHolder.tvDuaReference.setText("");
 
-            if (p.getFav()) {
-                mHolder.favButton.setText("{faw-star}");
-            } else {
-                mHolder.favButton.setText("{faw-star-o}");
-            }
+            mHolder.favButton.setText(p.getFav() ? "{faw-star}" : "{faw-star-o}");
 
-            // Sync UI state for playing item
+            // Audio Sync
             if (playingReference == p.getReference()) {
                 activeSeekBar = mHolder.seekBar;
                 activePlayButton = mHolder.btnPlay;
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                    mHolder.btnPlay.setText("{gmd-pause}");
+                    mHolder.btnPlay.setText("{faw-pause}");
                     mHolder.seekBar.setMax(mediaPlayer.getDuration());
                     mHolder.seekBar.setProgress(mediaPlayer.getCurrentPosition());
                 } else {
-                    mHolder.btnPlay.setText("{gmd-play-arrow}");
+                    mHolder.btnPlay.setText("{faw-play}");
                 }
             } else {
-                mHolder.btnPlay.setText("{gmd-play-arrow}");
+                mHolder.btnPlay.setText("{faw-play}");
                 mHolder.seekBar.setProgress(0);
             }
 
-            mHolder.btnPlay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (playingReference == p.getReference() && mediaPlayer != null) {
-                        if (mediaPlayer.isPlaying()) {
-                            mediaPlayer.pause();
-                            mHolder.btnPlay.setText("{gmd-play-arrow}");
-                        } else {
-                            mediaPlayer.start();
-                            mHolder.btnPlay.setText("{gmd-pause}");
-                            updateSeekBar();
-                        }
+            // Listeners
+            mHolder.shareButton.setOnClickListener(v -> {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_TEXT,
+                        myToolbarTitle + "\n\n" +
+                                mHolder.tvDuaArabic.getText() + "\n\n" +
+                                mHolder.tvDuaTranslation.getText() + "\n\n" +
+                                v.getResources().getString(R.string.action_share_credit)
+                );
+                intent.setType("text/plain");
+                v.getContext().startActivity(Intent.createChooser(intent, v.getResources().getString(R.string.action_share_title)));
+            });
+
+            mHolder.favButton.setOnClickListener(v -> {
+                boolean isFav = !p.getFav();
+                SQLiteDatabase db = ExternalDbOpenHelper.getInstance(v.getContext()).getDb();
+                ContentValues values = new ContentValues();
+                values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
+                if (db.update(HisnDatabaseInfo.DuaTable.TABLE_NAME, values, HisnDatabaseInfo.DuaTable.DUA_ID + " = ?", new String[]{String.valueOf(p.getReference())}) == 1) {
+                    p.setFav(isFav);
+                    notifyDataSetChanged();
+                }
+            });
+
+            mHolder.btnPlay.setOnClickListener(v -> {
+                if (playingReference == p.getReference() && mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        mHolder.btnPlay.setText("{faw-play}");
                     } else {
-                        playAudio(p.getReference(), mHolder.seekBar, mHolder.btnPlay);
+                        mediaPlayer.start();
+                        mHolder.btnPlay.setText("{faw-pause}");
+                        updateSeekBar();
                     }
+                } else {
+                    playAudio(p.getReference(), mHolder.seekBar, mHolder.btnPlay);
                 }
             });
 
@@ -251,7 +220,6 @@ public class DuaDetailAdapter extends BaseAdapter {
             });
         }
 
-
         return convertView;
     }
 
@@ -260,68 +228,44 @@ public class DuaDetailAdapter extends BaseAdapter {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-
-        // Reset previous playing state if exists
-        if (playingReference != -1) {
-            notifyDataSetChanged();
-        }
+        if (playingReference != -1) notifyDataSetChanged();
 
         String fileName = "a" + reference + ".mp3";
         try {
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioAttributes(
-                    new AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .build()
-            );
-            
+            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).setUsage(AudioAttributes.USAGE_MEDIA).build());
             android.content.res.AssetFileDescriptor afd = mContext.getAssets().openFd("audio/" + fileName);
             mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
-            
             mediaPlayer.prepare();
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mp.start();
-                    playingReference = reference;
-                    activeSeekBar = seekBar;
-                    activePlayButton = playButton;
-                    seekBar.setMax(mp.getDuration());
-                    playButton.setText("{gmd-pause}");
-                    updateSeekBar();
-                }
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                playingReference = reference;
+                activeSeekBar = seekBar;
+                activePlayButton = playButton;
+                seekBar.setMax(mp.getDuration());
+                playButton.setText("{faw-pause}");
+                updateSeekBar();
             });
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    playingReference = -1;
-                    playButton.setText("{gmd-play-arrow}");
-                    seekBar.setProgress(0);
-                    mHandler.removeCallbacks(updater);
-                }
+            mediaPlayer.setOnCompletionListener(mp -> {
+                playingReference = -1;
+                playButton.setText("{faw-play}");
+                seekBar.setProgress(0);
+                mHandler.removeCallbacks(updater);
             });
-
         } catch (IOException e) {
-            Log.e("DuaDetailAdapter", "Error playing audio: " + fileName, e);
-            Toast.makeText(mContext, "Audio not found for this Dua", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Audio not found", Toast.LENGTH_SHORT).show();
             playingReference = -1;
         }
     }
 
-    private void updateSeekBar() {
-        mHandler.postDelayed(updater, 100);
-    }
+    private void updateSeekBar() { mHandler.postDelayed(updater, 100); }
 
     private Runnable updater = new Runnable() {
         @Override
         public void run() {
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                if (activeSeekBar != null) {
-                    activeSeekBar.setProgress(mediaPlayer.getCurrentPosition());
-                }
+                if (activeSeekBar != null) activeSeekBar.setProgress(mediaPlayer.getCurrentPosition());
                 mHandler.postDelayed(this, 100);
             }
         }
@@ -337,14 +281,8 @@ public class DuaDetailAdapter extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        TextView tvDuaNumber;
-        TextView tvDuaArabic;
-        IconicsButton btnPlay;
+        TextView tvDuaNumber, tvDuaArabic, tvDuaTransliteration, tvDuaReference, tvDuaTranslation;
         SeekBar seekBar;
-        TextView tvDuaTransliteration;
-        TextView tvDuaReference;
-        TextView tvDuaTranslation;
-        IconicsButton shareButton;
-        IconicsButton favButton;
+        IconicsButton btnPlay, shareButton, favButton;
     }
 }

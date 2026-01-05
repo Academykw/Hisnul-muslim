@@ -116,6 +116,11 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
         setupGridView();
 
+        // Initial UI state: Show GridView, Hide ListView
+        mGridView.setVisibility(View.VISIBLE);
+        mListView.setVisibility(View.GONE);
+        updateOptionUI(true);
+
         getSupportLoaderManager().initLoader(0, null, this);
 
         try {
@@ -149,7 +154,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private List<Integer> getFilterIdsForCategory(int position) {
         // MAPPING: Actual Group IDs from your SQLite database
         switch (position) {
-            case 0: return Arrays.asList(34, 35, 36, 37, 38, 39, 40, 41); // Illness
+            case 0: return Arrays.asList(49, 50, 51, 52, 53, 54,55,56,57,58,59,60,124); // Illness
             case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); // Daily Life
             case 2: return Arrays.asList(81, 82, 83, 84, 85, 86, 87, 88); // Travel
             case 3: return Arrays.asList(27, 28); // Morning/Night
