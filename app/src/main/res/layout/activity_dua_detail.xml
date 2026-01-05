@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-
     <include
         android:id="@+id/my_detail_action_bar"
         layout="@layout/toolbar_dua_detail" />
@@ -18,11 +16,10 @@
             android:id="@+id/duaDetailListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
+            android:clipToPadding="true"
             android:divider="@null"
-            android:footerDividersEnabled="true"
-            android:headerDividersEnabled="true"
-            android:paddingBottom="10dp"
+            android:overScrollMode="never"
+            android:paddingBottom="24dp"
             android:paddingTop="10dp"
             android:scrollbarStyle="outsideOverlay" />
 

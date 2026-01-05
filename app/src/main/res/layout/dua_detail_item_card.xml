@@ -48,7 +48,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/button_star"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:text="{gmd-share}"
+                    android:text="{faw-share-alt}"
                     android:textAllCaps="false"
                     android:textColor="@color/nightModeColorPrimary"
                     android:textSize="24sp" />
@@ -94,7 +94,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:text="{gmd-play-arrow}"
+                    android:text="{faw-play}"
                     android:textAllCaps="false"
                     android:textColor="@color/colorPrimary"
                     android:textSize="24sp" />
