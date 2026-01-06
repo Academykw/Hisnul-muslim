@@ -47,8 +47,8 @@
     <string name="snackbar_action" translatable="false">undo</string>
 
     <!-- Theme Preferences -->
-    <string name="pref_theme_title">Theme</string>
-    <string name="pref_theme_summary">Select the application theme</string>
+    <string name="pref_theme_title" translatable="false">Theme</string>
+    <string name="pref_theme_summary" translatable="false">Select the application theme</string>
     <string-array name="pref_theme_entries">
         <item>Light</item>
         <item>Dark</item>
