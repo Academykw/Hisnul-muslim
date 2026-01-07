@@ -140,7 +140,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
         mGridView.setAdapter(gridAdapter);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
             List<Integer> filterIds = getFilterIdsForCategory(position);
-            
+
             // Open new screen with filtered results
             Intent intent = new Intent(this, FilteredDuaListActivity.class);
             intent.putIntegerArrayListExtra("filter_ids", new ArrayList<>(filterIds));
@@ -152,15 +152,15 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private List<Integer> getFilterIdsForCategory(int position) {
         switch (position) {
             case 0: return Arrays.asList(49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 124); // Illness
-            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28); // Daily Life
-            case 2: return Arrays.asList(81, 82, 83, 84, 85, 86, 87, 88); // Travel
-            case 3: return Arrays.asList(27, 28); // Morning/Night
-            case 4: return Arrays.asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20); // Prayer
-            case 5: return Arrays.asList(42, 43, 44, 45, 125, 126, 127); // Wellbeing
-            case 6: return Arrays.asList(46, 47, 48, 49, 50); // Trials
-            case 7: return Arrays.asList(89, 90, 91, 92, 93, 94, 95, 96); // Hajj/Umrah
+            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 10, 11, 28,29,30,31,41,61,62,63,64,65,66,67,68,69,70,71,72,76,77,78,79,80,81,82,83,97,84,85,86,87,89,90,107,98,106,123,108,110,112,113,122,125,111,126,75,127); // Daily Life
+            case 2: return Arrays.asList(10,99,96,97,98,95,100,101,102,103,104,105); // Travel
+            case 3: return Arrays.asList(1,27,28,29,30,31,129); // Morning/Night
+            case 4: return Arrays.asList(8,9,12,13,14,15,16,17,18,119,20,21,22,23,24,25,26,32,33,127); // Prayer
+            case 5: return Arrays.asList(48,88,128,35); // Wellbeing
+            case 6: return Arrays.asList(34,35,36,40,41,42,43,44,45,65,66,83,88,91,92,94,123,112,38,37,125,124,128,129); // Trials
+            case 7: return Arrays.asList(116,117,119,118,120,121,115); // Hajj/Umrah
             case 8: return Arrays.asList(120, 121, 122, 123); // Quranic Duas
-            case 9: return Arrays.asList(21, 22, 23, 24, 25, 26); // Azkar
+            case 9: return Arrays.asList(107,129,84,131,129); // Azkar
             default: return new ArrayList<>();
         }
     }
@@ -213,12 +213,13 @@ public class DuaGroupActivity extends AppCompatActivity implements
             if (imgOptionGrid != null) {
                 ImageViewCompat.setImageTintList(imgOptionGrid, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.red_700)));
             }
-            btnListOption.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+            btnListOption.setTextColor(ContextCompat.getColor(this, R.color.material_sub_bg_text));
             btnListOption.setAlpha(0.5f);
         } else {
             // Lists Active
             btnGridOption.setBackground(null);
             if (imgOptionGrid != null) {
+                // Set Grid icon to gray when LISTS is focused
                 ImageViewCompat.setImageTintList(imgOptionGrid, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.darker_gray)));
             }
             btnListOption.setTextColor(ContextCompat.getColor(this, R.color.red_700));
