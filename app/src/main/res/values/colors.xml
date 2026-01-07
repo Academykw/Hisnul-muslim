@@ -5,7 +5,6 @@
 
     <!-- Material Colors -->
     <color name="red_50">#fde0dc</color>
-    <color name="red_100">#f9bdbb</color>
     <color name="red_200">#f69988</color>
     <color name="red_300">#f36c60</color>
     <color name="red_400">#e84e40</color>
