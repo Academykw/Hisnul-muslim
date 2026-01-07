@@ -30,6 +30,6 @@
     <!-- Extra Colors -->
     <color name="material_main_bg">#121212</color>
     <color name="material_sub_bg">#1E1E1E</color>
-    <color name="material_sub_bg_text">#E0E0E0</color>
+    <color name="material_sub_bg_text">#FFFFFF</color>
     <color name="material_actionbar_title">#FFFFFF</color>
 </resources>
