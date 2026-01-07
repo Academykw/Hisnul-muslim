@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
@@ -54,6 +57,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private HorizontalScrollView optionsScrollView;
 
     private View btnGridOption;
+    private ImageView imgOptionGrid;
     private TextView btnListOption;
     private View btnBookmarkOption;
     private View btnSearchOption;
@@ -100,6 +104,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
         optionsScrollView = (HorizontalScrollView) findViewById(R.id.options_scroll_view);
 
         btnGridOption = findViewById(R.id.option_grid);
+        imgOptionGrid = findViewById(R.id.img_option_grid);
         btnListOption = findViewById(R.id.option_list);
         btnBookmarkOption = findViewById(R.id.option_bookmark);
         btnSearchOption = findViewById(R.id.option_search);
@@ -136,33 +141,25 @@ public class DuaGroupActivity extends AppCompatActivity implements
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
             List<Integer> filterIds = getFilterIdsForCategory(position);
             
-            // Show ListView, Hide GridView
-            mGridView.setVisibility(View.GONE);
-            mListView.setVisibility(View.VISIBLE);
-            updateOptionUI(false);
-            centerViewInScrollView(btnListOption);
-
-            // Reload data with filter
-            Bundle args = new Bundle();
-            args.putIntegerArrayList("filter_ids", new ArrayList<>(filterIds));
-            getSupportLoaderManager().restartLoader(0, args, this);
-            
-            Toast.makeText(this, "Showing " + categories[position], Toast.LENGTH_SHORT).show();
+            // Open new screen with filtered results
+            Intent intent = new Intent(this, FilteredDuaListActivity.class);
+            intent.putIntegerArrayListExtra("filter_ids", new ArrayList<>(filterIds));
+            intent.putExtra("category_title", categories[position]);
+            startActivity(intent);
         });
     }
 
     private List<Integer> getFilterIdsForCategory(int position) {
-        // MAPPING: Actual Group IDs from your SQLite database
         switch (position) {
-            case 0: return Arrays.asList(49, 50, 51, 52, 53, 54,55,56,57,58,59,60,124); // Illness
-            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); // Daily Life
+            case 0: return Arrays.asList(49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 124); // Illness
+            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28); // Daily Life
             case 2: return Arrays.asList(81, 82, 83, 84, 85, 86, 87, 88); // Travel
             case 3: return Arrays.asList(27, 28); // Morning/Night
             case 4: return Arrays.asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20); // Prayer
-            case 5: return Arrays.asList(42, 43, 44, 45); // Wellbeing
+            case 5: return Arrays.asList(42, 43, 44, 45, 125, 126, 127); // Wellbeing
             case 6: return Arrays.asList(46, 47, 48, 49, 50); // Trials
-            case 7: return Arrays.asList(89, 90, 91, 92); // Hajj/Umrah
-            case 8: return Arrays.asList(120, 121, 122, 123); // Quranic Duas (Example IDs)
+            case 7: return Arrays.asList(89, 90, 91, 92, 93, 94, 95, 96); // Hajj/Umrah
+            case 8: return Arrays.asList(120, 121, 122, 123); // Quranic Duas
             case 9: return Arrays.asList(21, 22, 23, 24, 25, 26); // Azkar
             default: return new ArrayList<>();
         }
@@ -184,8 +181,6 @@ public class DuaGroupActivity extends AppCompatActivity implements
                 mListView.setVisibility(View.VISIBLE);
                 updateOptionUI(false);
                 centerViewInScrollView(btnListOption);
-                // Reset filter to show everything
-                getSupportLoaderManager().restartLoader(0, null, this);
             });
         }
 
@@ -213,11 +208,21 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
     private void updateOptionUI(boolean isGrid) {
         if (isGrid) {
+            // Grid Active
             btnGridOption.setBackgroundResource(R.drawable.bg_option_selected);
+            if (imgOptionGrid != null) {
+                ImageViewCompat.setImageTintList(imgOptionGrid, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.red_700)));
+            }
             btnListOption.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+            btnListOption.setAlpha(0.5f);
         } else {
+            // Lists Active
             btnGridOption.setBackground(null);
+            if (imgOptionGrid != null) {
+                ImageViewCompat.setImageTintList(imgOptionGrid, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.darker_gray)));
+            }
             btnListOption.setTextColor(ContextCompat.getColor(this, R.color.red_700));
+            btnListOption.setAlpha(1.0f);
         }
     }
 
@@ -320,11 +325,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
     @Override
     public Loader<List<Dua>> onCreateLoader(int id, Bundle args) {
-        List<Integer> filterIds = null;
-        if (args != null && args.containsKey("filter_ids")) {
-            filterIds = args.getIntegerArrayList("filter_ids");
-        }
-        return new DuaGroupLoader(this, filterIds);
+        return new DuaGroupLoader(this, null);
     }
 
     @Override
