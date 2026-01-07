@@ -32,7 +32,7 @@
         android:fontFamily="sans-serif"
         android:gravity="center_vertical"
         android:text="Entering the Bathroom"
-        android:textColor="#453939"
+        android:textColor="@color/material_sub_bg_text"
         android:textSize="16sp" />
 
     <com.mikepenz.iconics.view.IconicsButton
