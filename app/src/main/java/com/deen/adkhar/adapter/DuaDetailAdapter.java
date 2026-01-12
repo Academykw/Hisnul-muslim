@@ -166,6 +166,7 @@ public class DuaDetailAdapter extends BaseAdapter {
             } else {
                 mHolder.btnPlay.setText("{faw-play}");
                 mHolder.seekBar.setProgress(0);
+                mHolder.seekBar.setMax(100);
             }
 
             // Listeners
@@ -187,7 +188,7 @@ public class DuaDetailAdapter extends BaseAdapter {
                 SQLiteDatabase db = ExternalDbOpenHelper.getInstance(v.getContext()).getDb();
                 ContentValues values = new ContentValues();
                 values.put(HisnDatabaseInfo.DuaTable.FAV, isFav ? 1 : 0);
-                if (db.update(HisnDatabaseInfo.DuaTable.TABLE_NAME, values, HisnDatabaseInfo.DuaTable.DUA_ID + " = ?", new String[]{String.valueOf(p.getReference())}) == 1) {
+                if (db.update(HisnDatabaseInfo.DuaTable.TABLE_NAME, values, HisnDatabaseInfo.DuaTable._ID + " = ?", new String[]{String.valueOf(p.getReference())}) == 1) {
                     p.setFav(isFav);
                     notifyDataSetChanged();
                 }
@@ -228,7 +229,9 @@ public class DuaDetailAdapter extends BaseAdapter {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        if (playingReference != -1) notifyDataSetChanged();
+        
+        playingReference = reference;
+        notifyDataSetChanged();
 
         String fileName = "a" + reference + ".mp3";
         try {
@@ -240,7 +243,6 @@ public class DuaDetailAdapter extends BaseAdapter {
             mediaPlayer.prepare();
             mediaPlayer.setOnPreparedListener(mp -> {
                 mp.start();
-                playingReference = reference;
                 activeSeekBar = seekBar;
                 activePlayButton = playButton;
                 seekBar.setMax(mp.getDuration());
@@ -249,8 +251,9 @@ public class DuaDetailAdapter extends BaseAdapter {
             });
             mediaPlayer.setOnCompletionListener(mp -> {
                 playingReference = -1;
-                playButton.setText("{faw-play}");
-                seekBar.setProgress(0);
+                activeSeekBar = null;
+                activePlayButton = null;
+                notifyDataSetChanged();
                 mHandler.removeCallbacks(updater);
             });
         } catch (IOException e) {
@@ -278,6 +281,8 @@ public class DuaDetailAdapter extends BaseAdapter {
         }
         mHandler.removeCallbacks(updater);
         playingReference = -1;
+        activeSeekBar = null;
+        activePlayButton = null;
     }
 
     public static class ViewHolder {
