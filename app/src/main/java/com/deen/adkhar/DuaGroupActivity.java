@@ -152,7 +152,9 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private List<Integer> getFilterIdsForCategory(int position) {
         switch (position) {
             case 0: return Arrays.asList(49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 124); // Illness
-            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 10, 11, 28,29,30,31,41,61,62,63,64,65,66,67,68,69,70,71,72,76,77,78,79,80,81,82,83,97,84,85,86,87,89,90,107,98,106,123,108,110,112,113,122,125,111,126,75,127); // Daily Life
+            case 1: return Arrays.asList(1, 2, 3, 4, 5, 6, 7, 10, 11, 28,29,30,31,41,61,62,63,64,
+                    65,66,67,68,69,70,71,72,76,77,78,79,80,81,82,83,97,84,85,86,87,89,90,107,98,
+                    106,123,108,110,112,113,122,125,111,126,75,127); // Daily Life
             case 2: return Arrays.asList(10,99,96,97,98,95,100,101,102,103,104,105); // Travel
             case 3: return Arrays.asList(1,27,28,29,30,31,129); // Morning/Night
             case 4: return Arrays.asList(8,9,12,13,14,15,16,17,18,119,20,21,22,23,24,25,26,32,33,127); // Prayer
