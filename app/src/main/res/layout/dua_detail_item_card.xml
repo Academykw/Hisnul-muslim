@@ -37,6 +37,7 @@
                     android:paddingBottom="5dp"
                     android:paddingTop="5dp"
                     android:text="1"
+                    android:visibility="gone"
                     android:textColor="@color/colorPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -82,7 +83,7 @@
                 android:paddingTop="10dp"
                android:textStyle="bold"
                 android:textColor="@color/material_sub_bg_text"
-                android:textSize="26sp" />
+                android:textSize="30dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -121,7 +122,7 @@
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:textColor="@color/material_sub_bg_text"
-                android:textSize="23sp"
+                android:textSize="30sp"
                 android:textStyle="italic" />
 
             <View
@@ -138,7 +139,7 @@
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
                 android:textColor="@color/material_sub_bg_text"
-                android:textSize="22sp" />
+                android:textSize="30dp" />
 
             <View
                 android:layout_width="match_parent"
@@ -155,7 +156,7 @@
                 android:paddingTop="15dp"
                 android:text="Dua Reference"
                 android:textColor="@color/material_sub_bg_text"
-                android:textSize="16sp" />
+                android:textSize="20dp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </FrameLayout>
