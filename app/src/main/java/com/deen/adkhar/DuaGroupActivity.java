@@ -19,15 +19,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.ImageViewCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
@@ -36,6 +39,7 @@ import com.deen.adkhar.adapter.CategoryGridAdapter;
 import com.deen.adkhar.adapter.DuaGroupAdapter;
 import com.deen.adkhar.loader.DuaGroupLoader;
 import com.deen.adkhar.model.Dua;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -55,6 +59,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
     private GridView mGridView;
     private Toolbar toolbar;
     private HorizontalScrollView optionsScrollView;
+    private DrawerLayout drawerLayout;
 
     private View btnGridOption;
     private ImageView imgOptionGrid;
@@ -83,6 +88,23 @@ public class DuaGroupActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dua_group);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ImageView btnDrawer = findViewById(R.id.btn_drawer);
+
+        btnDrawer.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_settings) {
+                startActivity(new Intent(this, PreferencesActivity.class));
+            } else if (id == R.id.nav_about) {
+                startActivity(new Intent(this, AboutActivity.class));
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
 
         View rootView = findViewById(R.id.root_dua_group);
         if (rootView != null) {
@@ -140,7 +162,7 @@ public class DuaGroupActivity extends AppCompatActivity implements
         mGridView.setAdapter(gridAdapter);
         mGridView.setOnItemClickListener((parent, view, position, id) -> {
             List<Integer> filterIds = getFilterIdsForCategory(position);
-
+            
             // Open new screen with filtered results
             Intent intent = new Intent(this, FilteredDuaListActivity.class);
             intent.putIntegerArrayListExtra("filter_ids", new ArrayList<>(filterIds));
@@ -221,7 +243,6 @@ public class DuaGroupActivity extends AppCompatActivity implements
             // Lists Active
             btnGridOption.setBackground(null);
             if (imgOptionGrid != null) {
-                // Set Grid icon to gray when LISTS is focused
                 ImageViewCompat.setImageTintList(imgOptionGrid, ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.darker_gray)));
             }
             btnListOption.setTextColor(ContextCompat.getColor(this, R.color.red_700));
@@ -361,7 +382,9 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if (back_pressed + 1000 > System.currentTimeMillis()){
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (back_pressed + 1000 > System.currentTimeMillis()){
             super.onBackPressed();
         }
         else{
