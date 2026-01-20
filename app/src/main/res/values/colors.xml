@@ -24,11 +24,26 @@
     <color name="colorAccent">@color/red_A200</color>
     <color name="colorPrimaryTrans">@color/red_700_trans</color>
 
+    <color name="material_blue_grey_900">#263238</color>
     <color name="nightModeColorPrimary">@color/material_blue_grey_900</color>
 
     <!-- Extra Colors -->
     <color name="material_main_bg">#FAFAFA</color>
     <color name="material_sub_bg">#E9E9E9</color>
     <color name="material_sub_bg_text">#0B0B0B</color>
-    <color name="material_actionbar_title">@color/primary_text_default_material_dark</color>
+    <color name="material_actionbar_title">#FFFFFF</color>
+    <color name="hijrah_gregorian_text">#616161</color>
+
+    <!-- Prayer screen -->
+    <color name="prayer_bg_start">#F4F1E9</color>
+    <color name="prayer_bg_end">#EAF2F6</color>
+    <color name="prayer_card_start">#FFFFFF</color>
+    <color name="prayer_card_end">#F2F7F6</color>
+    <color name="prayer_text_primary">#1A1E23</color>
+    <color name="prayer_text_secondary">#5E6B75</color>
+    <color name="prayer_accent">#2E6F6A</color>
+    <color name="prayer_accent_soft">#A9C7C2</color>
+    <color name="prayer_row_bg">#F5F7F6</color>
+    <color name="prayer_row_divider">#E2E6E8</color>
+    <color name="prayer_row_highlight">#DDECE8</color>
 </resources>
