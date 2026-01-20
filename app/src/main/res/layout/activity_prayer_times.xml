@@ -63,6 +63,17 @@
                             android:textSize="13sp" />
                     </LinearLayout>
 
+                    <TextView
+                        android:id="@+id/tv_location_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/prayer_location_name_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:fontFamily="serif" />
+
                     <TextClock
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
