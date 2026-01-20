@@ -1,0 +1,347 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/prayer_screen_bg"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/my_action_bar"
+        layout="@layout/toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/prayer_header_bg"
+                android:elevation="6dp"
+                android:padding="20dp">
+
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_gravity="end|top"
+                    android:alpha="0.15"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_prayer"
+                    android:tint="@color/prayer_accent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/prayer_dot" />
+
+                        <TextView
+                            android:id="@+id/tv_location_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/prayer_location_status_idle"
+                            android:textColor="@color/prayer_text_secondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <TextClock
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:format12Hour="h:mm"
+                        android:format24Hour="HH:mm"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="44sp"
+                        android:textStyle="bold"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/prayer_times_title"
+                        android:textColor="@color/prayer_text_secondary"
+                        android:textSize="13sp"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.08" />
+
+                    <TextClock
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:format12Hour="EEE, dd MMM yyyy"
+                        android:format24Hour="EEE, dd MMM yyyy"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_next_prayer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/prayer_next_placeholder"
+                        android:textColor="@color/prayer_text_secondary"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btn_update_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_prayer_outline_button"
+                        android:text="@string/prayer_update_location"
+                        android:textAllCaps="false"
+                        android:textColor="@color/prayer_accent"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/prayer_card_bg"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prayer_times_title"
+                    android:textColor="@color/prayer_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="serif" />
+
+                <LinearLayout
+                    android:id="@+id/row_fajr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_fajr"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_fajr_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_sunrise"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_sunrise"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_sunrise_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_dhuhr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_dhuhr"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_dhuhr_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_asr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_asr"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_asr_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_maghrib"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_maghrib"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_maghrib_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_isha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/prayer_row_bg"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/prayer_dot" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/prayer_isha"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_isha_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prayer_time_placeholder"
+                        android:textColor="@color/prayer_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
