@@ -9,6 +9,19 @@
         android:summary="@string/pref_theme_summary"
         android:title="@string/pref_theme_title" />
 
+    <ListPreference
+        android:defaultValue="@string/pref_adhan_sound_default"
+        android:entries="@array/pref_adhan_entries"
+        android:entryValues="@array/pref_adhan_values"
+        android:key="@string/pref_adhan_sound_key"
+        android:summary="%s"
+        android:title="@string/pref_adhan_sound_title" />
+
+    <Preference
+        android:key="pref_adhan_preview"
+        android:summary="@string/pref_adhan_preview_summary"
+        android:title="@string/pref_adhan_preview_title" />
+
     <PreferenceCategory android:title="@string/pref_category_font">
         <com.vanniktech.vntfontlistpreference.VNTFontListPreference
             xmlns:vntfontlistpreference="http://schemas.android.com/apk/res-auto"

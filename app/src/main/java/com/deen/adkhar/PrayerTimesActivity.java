@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.location.Geocoder;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import com.batoulapps.adhan.data.DateComponents;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class PrayerTimesActivity extends AppCompatActivity {
@@ -43,6 +45,7 @@ public class PrayerTimesActivity extends AppCompatActivity {
     private static final String PREF_LON = "prayer_lon";
 
     private TextView locationStatus;
+    private TextView locationName;
     private TextView nextPrayerCountdown;
     private TextView fajrTime;
     private TextView sunriseTime;
@@ -76,6 +79,7 @@ public class PrayerTimesActivity extends AppCompatActivity {
         }
 
         locationStatus = findViewById(R.id.tv_location_status);
+        locationName = findViewById(R.id.tv_location_name);
         nextPrayerCountdown = findViewById(R.id.tv_next_prayer);
         fajrTime = findViewById(R.id.tv_fajr_time);
         sunriseTime = findViewById(R.id.tv_sunrise_time);
@@ -128,6 +132,7 @@ public class PrayerTimesActivity extends AppCompatActivity {
             double lon = Double.longBitsToDouble(prefs.getLong(PREF_LON, 0));
             updatePrayerTimes(lat, lon);
             locationStatus.setText(getString(R.string.prayer_location_loaded));
+            fetchLocationName(lat, lon);
             PrayerTimesScheduler.scheduleForToday(this, lat, lon);
         } else {
             requestLocation();
@@ -196,6 +201,7 @@ public class PrayerTimesActivity extends AppCompatActivity {
         saveLocation(lat, lon);
         updatePrayerTimes(lat, lon);
         locationStatus.setText(getString(R.string.prayer_location_ready));
+        fetchLocationName(lat, lon);
         PrayerTimesScheduler.scheduleForToday(this, lat, lon);
     }
 
@@ -221,6 +227,63 @@ public class PrayerTimesActivity extends AppCompatActivity {
         ishaTime.setText(formatter.format(prayerTimes.isha));
         updateNextPrayerHighlight();
         startCountdownTicker();
+    }
+
+    private void fetchLocationName(double lat, double lon) {
+        if (!Geocoder.isPresent()) {
+            locationName.setText(getString(R.string.prayer_location_name_placeholder));
+            return;
+        }
+        new Thread(() -> {
+            String name = null;
+            try {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<android.location.Address> results = geocoder.getFromLocation(lat, lon, 1);
+                if (results != null && !results.isEmpty()) {
+                    android.location.Address address = results.get(0);
+                    String street = address.getThoroughfare();
+                    String area = address.getSubLocality();
+                    String locality = address.getLocality();
+                    String country = address.getCountryName();
+                    StringBuilder builder = new StringBuilder();
+                    if (street != null && !street.isEmpty()) {
+                        builder.append(street);
+                    }
+                    if (area != null && !area.isEmpty()) {
+                        if (builder.length() > 0) {
+                            builder.append(", ");
+                        }
+                        builder.append(area);
+                    }
+                    if (locality != null && !locality.isEmpty()) {
+                        if (builder.length() > 0) {
+                            builder.append(", ");
+                        }
+                        builder.append(locality);
+                    }
+                    if (country != null && !country.isEmpty()) {
+                        if (builder.length() > 0) {
+                            builder.append(", ");
+                        }
+                        builder.append(country);
+                    }
+                    if (builder.length() > 0) {
+                        name = builder.toString();
+                    } else {
+                        name = address.getAddressLine(0);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            String finalName = name;
+            runOnUiThread(() -> {
+                if (finalName != null && !finalName.isEmpty()) {
+                    locationName.setText(finalName);
+                } else {
+                    locationName.setText(getString(R.string.prayer_location_name_placeholder));
+                }
+            });
+        }).start();
     }
 
     private PrayerTimes getPrayerTimes(double lat, double lon, Date date) {
