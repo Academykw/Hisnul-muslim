@@ -7,6 +7,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="windowActionBarOverlay">true</item>
+        <item name="windowActionBarOverlay">false</item>
     </style>
 </resources>

@@ -22,4 +22,11 @@
     <integer name="pref_font_other_size_default">24</integer>
     <integer name="pref_font_other_size_max">30</integer>
     <integer name="pref_font_other_size_min">14</integer>
+
+    <string name="pref_adhan_sound_key">pref_adhan_sound</string>
+    <string name="pref_adhan_sound_title">Adhan sound</string>
+    <string name="pref_adhan_sound_summary">Select the adhan audio</string>
+    <string name="pref_adhan_sound_default">azan/azan1.mp3</string>
+    <string name="pref_adhan_preview_title">Preview adhan</string>
+    <string name="pref_adhan_preview_summary">Tap to play the selected adhan</string>
 </resources>
