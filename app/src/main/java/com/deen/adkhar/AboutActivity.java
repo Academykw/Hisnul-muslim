@@ -39,6 +39,8 @@ public class AboutActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             mToolbarShadow.setVisibility(View.GONE);
         }
+
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
     }
 
     @Override
