@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="zakat_currencies">
+        <item>USD</item>
+        <item>NGN</item>
+        <item>XAF</item>
+        <item>SAR</item>
+        <item>GBP</item>
+        <item>EUR</item>
+        <item>KES</item>
+        <item>GHS</item>
+        <item>CAD</item>
+        <item>AUD</item>
+    </string-array>
+
+    <string-array name="pref_adhan_entries">
+        <item>Azan 1 (Default)</item>
+        <item>Azan 2</item>
+        <item>Azan 3</item>
+        <item>Azan 4</item>
+    </string-array>
+
+    <string-array name="pref_adhan_values">
+        <item>azan/azan1.mp3</item>
+        <item>azan/azan2.mp3</item>
+        <item>azan/azan3.mp3</item>
+        <item>azan/azan4.mp3</item>
+    </string-array>
+</resources>
