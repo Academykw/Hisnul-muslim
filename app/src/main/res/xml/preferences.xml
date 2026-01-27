@@ -17,6 +17,12 @@
         android:summary="%s"
         android:title="@string/pref_adhan_sound_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_adhan_force_loud_key"
+        android:summary="@string/pref_adhan_force_loud_summary"
+        android:title="@string/pref_adhan_force_loud_title" />
+
     <Preference
         android:key="pref_adhan_preview"
         android:summary="@string/pref_adhan_preview_summary"

@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.view.MenuItem;
 import android.view.View;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.preference.Preference;
 
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -35,13 +39,25 @@ public class PreferencesActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             mToolbarShadow.setVisibility(View.GONE);
         }
+
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
     }
 
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+        private MediaPlayer mediaPlayer;
+
         @Override
         public void onCreate(Bundle paramBundle) {
             super.onCreate(paramBundle);
             addPreferencesFromResource(R.xml.preferences);
+
+            Preference previewPreference = findPreference("pref_adhan_preview");
+            if (previewPreference != null) {
+                previewPreference.setOnPreferenceClickListener(preference -> {
+                    playAdhanPreview();
+                    return true;
+                });
+            }
         }
 
         @Override
@@ -56,6 +72,7 @@ public class PreferencesActivity extends AppCompatActivity {
             super.onPause();
             getPreferenceScreen().getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(this);
+            stopPreview();
         }
 
         @Override
@@ -75,6 +92,40 @@ public class PreferencesActivity extends AppCompatActivity {
                         break;
                 }
                 AppCompatDelegate.setDefaultNightMode(mode);
+            }
+        }
+
+        private void playAdhanPreview() {
+            stopPreview();
+            SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
+            String adhanKey = getString(R.string.pref_adhan_sound_key);
+            String assetPath = prefs.getString(adhanKey, "azan/azan1.mp3");
+            mediaPlayer = new MediaPlayer();
+            try (AssetFileDescriptor afd = getActivity().getAssets().openFd(assetPath)) {
+                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
+                mediaPlayer.setOnCompletionListener(mp -> stopPreview());
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    stopPreview();
+                    return true;
+                });
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (Exception e) {
+                stopPreview();
+            }
+        }
+
+        private void stopPreview() {
+            if (mediaPlayer != null) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                mediaPlayer.release();
+                mediaPlayer = null;
             }
         }
     }

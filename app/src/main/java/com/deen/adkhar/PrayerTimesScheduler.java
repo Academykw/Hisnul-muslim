@@ -23,6 +23,9 @@ public final class PrayerTimesScheduler {
 
     public static final String EXTRA_PRAYER_NAME = "extra_prayer_name";
     public static final String EXTRA_NOTIFICATION_ID = "extra_notification_id";
+    private static final String PREFS_NAME = "prayer_prefs";
+    private static final String PREF_LAST_PRAYER_NAME = "prayer_last_name";
+    private static final String PREF_LAST_PRAYER_TIME = "prayer_last_time";
 
     private PrayerTimesScheduler() {
     }
@@ -33,10 +36,21 @@ public final class PrayerTimesScheduler {
             return;
         }
 
+        android.content.SharedPreferences prefs =
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String lastPrayerName = prefs.getString(PREF_LAST_PRAYER_NAME, null);
+        long lastPrayerTime = prefs.getLong(PREF_LAST_PRAYER_TIME, 0L);
+
         List<PrayerEntry> prayers = getTodayPrayers(lat, lon);
         long now = System.currentTimeMillis();
         long graceWindowMs = 2L * 60L * 1000L;
         for (PrayerEntry entry : prayers) {
+            if (lastPrayerName != null
+                    && lastPrayerName.equals(entry.name)
+                    && lastPrayerTime > 0
+                    && Math.abs(entry.time.getTime() - lastPrayerTime) < graceWindowMs) {
+                continue;
+            }
             if (entry.time.getTime() + graceWindowMs <= now) {
                 continue;
             }
@@ -44,6 +58,19 @@ public final class PrayerTimesScheduler {
             alarmManager.cancel(pendingIntent);
             long triggerAt = Math.max(entry.time.getTime(), now + 1000L);
             scheduleExact(context, alarmManager, triggerAt, pendingIntent);
+        }
+
+        if (!prayers.isEmpty() && now > prayers.get(0).time.getTime()) {
+            Date tomorrowFajr = getTomorrowFajr(lat, lon);
+            if (tomorrowFajr != null) {
+                PendingIntent pendingIntent = buildAlarmIntent(
+                        context,
+                        prayers.get(0).name,
+                        prayers.get(0).notificationId
+                );
+                alarmManager.cancel(pendingIntent);
+                scheduleExact(context, alarmManager, tomorrowFajr.getTime(), pendingIntent);
+            }
         }
 
         scheduleNextDayRefresh(context, alarmManager);
@@ -64,6 +91,18 @@ public final class PrayerTimesScheduler {
         prayers.add(new PrayerEntry("Maghrib", prayerTimes.maghrib));
         prayers.add(new PrayerEntry("Isha", prayerTimes.isha));
         return prayers;
+    }
+
+    private static Date getTomorrowFajr(double lat, double lon) {
+        Coordinates coordinates = new Coordinates(lat, lon);
+        CalculationParameters params = CalculationMethod.MUSLIM_WORLD_LEAGUE.getParameters();
+        params.madhab = Madhab.SHAFI;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        DateComponents components = DateComponents.from(calendar.getTime());
+        PrayerTimes prayerTimes = new PrayerTimes(coordinates, components, params);
+        return prayerTimes.fajr;
     }
 
     private static PendingIntent buildAlarmIntent(Context context, String prayerName, int notificationId) {
