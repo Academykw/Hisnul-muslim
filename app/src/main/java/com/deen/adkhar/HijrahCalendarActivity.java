@@ -65,6 +65,7 @@ public class HijrahCalendarActivity extends AppCompatActivity {
         btnNext.setOnClickListener(v -> shiftMonth(1));
 
         updateMonth();
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
     }
 
     private void shiftMonth(int delta) {
