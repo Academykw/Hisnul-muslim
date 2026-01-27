@@ -42,4 +42,4 @@ captures/
 
 # Keystore files
 *.jks
-
+*zakat-secrets.properties

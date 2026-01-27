@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@color/material_main_bg"
     android:orientation="vertical">
 
@@ -143,4 +144,10 @@
         android:padding="12dp"
         android:textColor="@color/material_sub_bg_text"
         android:textSize="14sp" />
+
+    <FrameLayout
+        android:id="@+id/ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp" />
 </LinearLayout>
