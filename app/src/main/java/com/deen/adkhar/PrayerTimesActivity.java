@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.app.AlarmManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -95,11 +96,13 @@ public class PrayerTimesActivity extends AppCompatActivity {
         rowIsha = findViewById(R.id.row_isha);
         Button updateLocation = findViewById(R.id.btn_update_location);
         updateLocation.setOnClickListener(v -> requestLocation());
+        setVolumeControlStream(AudioManager.STREAM_ALARM);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         requestExactAlarmPermissionIfNeeded();
         requestNotificationPermissionIfNeeded();
         loadSavedLocationOrRequest();
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
     }
 
     private void requestExactAlarmPermissionIfNeeded() {
