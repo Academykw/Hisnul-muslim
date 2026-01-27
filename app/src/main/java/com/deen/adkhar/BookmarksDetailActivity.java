@@ -69,6 +69,7 @@ public class BookmarksDetailActivity extends AppCompatActivity
             mToolbarShadow.setVisibility(View.GONE);
         }
 
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
         getSupportLoaderManager().initLoader(0, null, this);
     }
 

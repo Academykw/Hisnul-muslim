@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId "com.deen.adkhar"
-        minSdkVersion 21
+        minSdkVersion 23
         //noinspection OldTargetApi
         targetSdkVersion 35
         versionCode 4
@@ -56,10 +56,12 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-messaging:24.0.0'
     implementation 'com.google.firebase:firebase-database:21.0.0'
+    implementation 'com.google.firebase:firebase-config:22.0.0'
     implementation 'com.google.android.ump:user-messaging-platform:2.2.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.activity:activity:1.9.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
     // Google Play In-App Updates
     implementation 'com.google.android.play:app-update:2.1.0'
@@ -69,4 +71,7 @@ dependencies {
 
     // Prayer time calculations
     implementation 'com.batoulapps.adhan:adhan:1.2.1'
+
+    //admob
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
 }
