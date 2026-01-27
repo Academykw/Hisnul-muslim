@@ -97,7 +97,13 @@ public class DuaGroupActivity extends AppCompatActivity implements
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_settings) {
+            if (id == R.id.nav_hijrah) {
+                startActivity(new Intent(this, HijrahCalendarActivity.class));
+            } else if (id == R.id.nav_zakat) {
+                startActivity(new Intent(this, ZakatCalculatorActivity.class));
+            } else if (id == R.id.nav_prayer) {
+                startActivity(new Intent(this, PrayerTimesActivity.class));
+            } else if (id == R.id.nav_settings) {
                 startActivity(new Intent(this, PreferencesActivity.class));
             } else if (id == R.id.nav_about) {
                 startActivity(new Intent(this, AboutActivity.class));

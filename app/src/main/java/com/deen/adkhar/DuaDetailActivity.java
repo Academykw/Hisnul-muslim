@@ -70,6 +70,7 @@ public class DuaDetailActivity extends AppCompatActivity
             mToolbarShadow.setVisibility(View.GONE);
         }
 
+        AdBannerHelper.loadBanner(this, R.id.ad_view);
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
@@ -133,6 +134,7 @@ public class DuaDetailActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (!isNavigatingBack) {
             isNavigatingBack = true;
             finish();
