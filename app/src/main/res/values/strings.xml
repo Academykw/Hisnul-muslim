@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Deen Adkhar</string>
+    <string name="app_name">Deen Azkar</string>
     <string name="app_name_about" translatable="false">Deen Adkhar App</string>
     <string name="version_name" translatable="false">Version 1.1.0</string>
     <string name="beta_version" translatable="false">0.06 - RecyclerView</string>
@@ -11,33 +11,101 @@
     <string name="action_about">About</string>
     <string name="action_night_mode">Night Mode</string>
     <string name="duaDetailFragment" translatable="false">Dua Detail Fragment</string>
-    <string name="title_activity_dua_list">Deen Adkhar</string>
+    <string name="title_activity_dua_list">Deen Azkar</string>
     <string name="title_activity_dua_detail" translatable="false">DuaDetail</string>
     <string name="title_activity_about">About</string>
     <string name="hello_world" translatable="false">Hello world!</string>
     <string name="title_activity_bookmarks">Bookmarks</string>
     <string name="search_hint">Search Dua</string>
     <string name="title_activity_preferences">Settings</string>
-    <string name="about_us" translatable="false">
-        <![CDATA[
-            Deen Adkhar is a collection of supplications for various occasions compiled by  Aliu usman. The author is from amongst the senior students of the former Grand Mufti of Saudi Arabia, Shaykh Abdul Aziz bin Abdullah bin Baz (May Allah have mercy on him).
-            <br/><br/>
-            <big><b>Contributors</b></big><br/>
-           Aliu usman (<a href="https://twitter.com/bin_ali40?t=zj8vCxuyU6wWFJEmiuLIXw&s=09">@ausman</a>)<br/>
+    <string name="title_activity_hijrah_calendar" translatable="false">Hijrah Calendar</string>
+    <string name="action_previous" translatable="false">Previous</string>
+    <string name="action_next" translatable="false">Next</string>
+    <string name="hijrah_eid_fitr" translatable="false">Eid al-Fitr</string>
+    <string name="hijrah_eid_adha" translatable="false">Eid al-Adha</string>
+    <string name="hijrah_events_prefix" translatable="false">Events this month: %1$s</string>
+    <string name="hijrah_events_none" translatable="false">No events this month.</string>
+    <string name="hijrah_event_eid_fitr" translatable="false">Eid al-Fitr (1 Shawwal)</string>
+    <string name="hijrah_event_eid_adha" translatable="false">Eid al-Adha (10 Dhul Hijjah)</string>
+    <string name="title_activity_zakat_calculator" translatable="false">Zakat Calculator</string>
+    <string name="zakat_intro" translatable="false">Calculate your zakat based on net assets (assets minus liabilities) and nisab.</string>
+    <string name="zakat_currency_label" translatable="false">Currency</string>
+    <string name="zakat_assets_label" translatable="false">Total assets</string>
+    <string name="zakat_assets_hint" translatable="false">Enter total assets</string>
+    <string name="zakat_liabilities_label" translatable="false">Liabilities</string>
+    <string name="zakat_liabilities_hint" translatable="false">Enter liabilities</string>
+    <string name="zakat_nisab_label" translatable="false">Nisab threshold</string>
+    <string name="zakat_nisab_hint" translatable="false">Enter nisab value</string>
+    <string name="zakat_nisab_status_idle" translatable="false">Nisab not loaded.</string>
+    <string name="zakat_nisab_status_loading" translatable="false">Loading nisab for %1$s...</string>
+    <string name="zakat_nisab_status_ready" translatable="false">Nisab loaded for %1$s.</string>
+    <string name="zakat_nisab_status_missing" translatable="false">No nisab set for %1$s.</string>
+    <string name="zakat_nisab_status_error" translatable="false">Unable to load nisab from Firebase.</string>
+    <string name="zakat_calculate" translatable="false">Calculate Zakat</string>
+    <string name="zakat_result_default" translatable="false">Zakat due: 0</string>
+    <string name="zakat_result_value" translatable="false">Zakat due: %1$s %2$s</string>
+    <string name="zakat_breakdown_default" translatable="false">Breakdown will appear here.</string>
+    <string name="zakat_breakdown_net" translatable="false">Net assets: %1$s %2$s</string>
+    <string name="zakat_breakdown_nisab" translatable="false">Nisab: %1$s %2$s</string>
+    <string name="zakat_breakdown_rate" translatable="false">Zakat rate: 2.5%</string>
+    <string name="zakat_breakdown_status_due" translatable="false">Status: Zakat is due</string>
+    <string name="zakat_breakdown_status_not_due" translatable="false">Status: Zakat is not due</string>
+    <string name="title_activity_prayer_times">Prayer Times</string>
+    <string name="ad_banner_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="prayer_location_status_idle">Location not set.</string>
+    <string name="prayer_location_fetching">Fetching location...</string>
+    <string name="prayer_location_ready">Location updated.</string>
+    <string name="prayer_location_loaded">Using saved location.</string>
+    <string name="prayer_location_denied">Location permission denied.</string>
+    <string name="prayer_location_disabled">Location is disabled. Please enable it.</string>
+    <string name="prayer_update_location">Use current location</string>
+    <string name="prayer_times_title">Today\'s Prayer Times</string>
+    <string name="prayer_time_placeholder">--:--</string>
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+    <string name="prayer_notification_title">%1$s time</string>
+    <string name="prayer_notification_body">It\'s time for prayer.</string>
+    <string name="prayer_notification_cancel">Cancel</string>
+    <string name="prayer_next_placeholder">Next prayer: --</string>
+    <string name="prayer_next_format">Next: %1$s in %2$s</string>
+    <string name="prayer_location_name_placeholder">Location</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_cta_next">Next</string>
+    <string name="onboarding_cta_enable">Enable and Continue</string>
+    <string name="onboarding_title_prayer">Prayer Times + Adhan</string>
+    <string name="onboarding_body_prayer">Stay on time with accurate prayer times and adhan alerts tailored to your location.</string>
+    <string name="onboarding_title_calendar">Hijri Calendar and Zakat</string>
+    <string name="onboarding_body_calendar">Track the Hijri calendar, important dates, and calculate zakat in seconds.</string>
+    <string name="onboarding_title_permissions">Personalized Prayer Alerts</string>
+    <string name="onboarding_body_permissions">We need location, notifications, and alarms to remind you at the right time.</string>
+    <string name="about_us" translatable="false"><![CDATA[
+        <h3>Welcome to Deen Azkar</h3>
+        <p><b>Deen Azkar</b> is your daily companion for spiritual growth and religious mindfulness. Our mission is to provide an accessible and comprehensive resource for Muslims worldwide to practice their faith with ease and precision.</p>
 
-            <br/><br/>
+        <h4>Key Features:</h4>
+        <ul>
+            <li><b>Daily Azkar:</b> A vast collection of authentic Duas and Adkhar from Hisnul Muslim, categorized for every occasion.</li>
+            <li><b>Prayer Times:</b> Accurate local prayer timings with notifications to help you stay connected to your salah.</li>
+            <li><b>Zakat Calculator:</b> An easy-to-use tool for calculating your Zakat based on net assets and current Nisab thresholds.</li>
+            <li><b>Hijrah Calendar:</b> Stay updated with Islamic dates and important events throughout the Hijri year.</li>
+            <li><b>Bookmarks:</b> Save your favorite Duas for quick access whenever you need them.</li>
+            <li><b>Night Mode:</b> Comfortable reading experience in low-light environments.</li>
+        </ul>
 
+        <p>This application is designed with simplicity and authenticity in mind. We strive to provide accurate content sourced from reliable Islamic references.</p>
 
-        ]]>
-    </string>
+        <p>For feedback or suggestions, please contact us at: <a href="mailto:developerussy@gmail.com">developerussy@gmail.com</a></p>
+
+        <p><i>May Allah (SWT) accept our efforts and make this app a source of benefit for the Ummah.</i></p>
+    ]]></string>
 
     <string name="bookmarks_none" translatable="false">You have no bookmarks yet.</string>
     <string name="action_share_title" translatable="false">Share Dua</string>
     <string name="action_share_credit" translatable="false">via @HDeenAdkharApp</string>
-
-
-
-
 
     <string name="button_share_icon" translatable="false"></string>
     <string name="button_fav_icon" translatable="false">{faw-star}</string>

@@ -29,4 +29,7 @@
     <string name="pref_adhan_sound_default">azan/azan1.mp3</string>
     <string name="pref_adhan_preview_title">Preview adhan</string>
     <string name="pref_adhan_preview_summary">Tap to play the selected adhan</string>
+    <string name="pref_adhan_force_loud_key">pref_adhan_force_loud</string>
+    <string name="pref_adhan_force_loud_title">Play adhan in silent mode</string>
+    <string name="pref_adhan_force_loud_summary">Ignore silent/vibrate when the adhan plays</string>
 </resources>

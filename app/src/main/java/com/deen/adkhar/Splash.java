@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 
 public class Splash extends AppCompatActivity {
 
@@ -20,8 +21,12 @@ public class Splash extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent mainIntent = new Intent(Splash.this,DuaGroupActivity.class);
-                Splash.this.startActivity(mainIntent);
+                boolean onboardingDone = PreferenceManager.getDefaultSharedPreferences(Splash.this)
+                        .getBoolean("pref_onboarding_done", false);
+                Intent intent = onboardingDone
+                        ? new Intent(Splash.this, DuaGroupActivity.class)
+                        : new Intent(Splash.this, OnboardingActivity.class);
+                Splash.this.startActivity(intent);
                 Splash.this.finish();
             }
         },SPLASH_DISPLAY_LENGTH);
