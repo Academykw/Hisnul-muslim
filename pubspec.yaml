@@ -1,0 +1,86 @@
+name: deen_azkar
+description: Deen Azkar - Daily Duas & Adhkar app.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Database
+  sqflite: ^2.3.2
+  path: ^1.9.0
+  path_provider: ^2.1.2
+
+  # Audio
+  just_audio: ^0.9.39
+
+  # Firebase
+  firebase_core: ^3.0.0
+  cloud_firestore: ^5.0.0
+
+  # Connectivity
+  connectivity_plus: ^6.0.3
+
+  # Screenshot & Sharing
+  screenshot: ^3.0.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Shared preferences
+  shared_preferences: ^2.2.3
+
+  # Share
+  share_plus: ^10.1.4
+
+  # Icons
+  flutter_svg: ^2.0.10
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Prayer Times & Location
+  adhan_dart: ^1.2.0
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+  flutter_local_notifications: ^17.2.1
+  android_alarm_manager_plus: ^4.0.3
+  intl: ^0.19.0
+  hijri: ^3.0.0
+  timezone: ^0.9.4
+  flutter_timezone: ^5.0.2
+
+  # Zakat (HTTP)
+  http: ^1.2.1
+
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/db/
+    - assets/img/
+    - assets/fonts/
+    - assets/azan/
+    - assets/audio/
+
+  fonts:
+    - family: DroidNaskh
+      fonts:
+        - asset: assets/fonts/DroidNaskh.ttf
+    - family: Uthmanic
+      fonts:
+        - asset: assets/fonts/UthmanTN1 Ver10.otf
+    - family: UthmanicV09
+      fonts:
+        - asset: assets/fonts/UthmanTN1 Ver09.otf
