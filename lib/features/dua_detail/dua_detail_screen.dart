@@ -6,6 +6,7 @@ import '../../core/models/dua.dart';
 import '../../core/services/settings_service.dart';
 import '../../core/services/audio_service.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class DuaDetailScreen extends StatefulWidget {
   final int duaId;
@@ -99,7 +100,7 @@ class _DuaDetailScreenState extends State<DuaDetailScreen> {
               style: TextStyle(
                 fontSize: 12,
                 color: (isDark ? theme.colorScheme.onSurface : Colors.white)
-                    .withOpacity(0.72),
+                    .withValues(alpha: 0.72),
               ),
             ),
           ],
@@ -137,6 +138,7 @@ class _DuaDetailScreenState extends State<DuaDetailScreen> {
                     );
                   },
                 ),
+      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 

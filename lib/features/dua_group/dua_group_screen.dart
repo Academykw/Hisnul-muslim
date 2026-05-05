@@ -5,6 +5,7 @@ import '../../core/models/dua.dart';
 import '../../core/services/firebase_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/daily_inspiration_card.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 import '../bookmarks/bookmarks_group_screen.dart';
 import '../dua_detail/dua_detail_screen.dart';
 import '../categories/category_grid_screen.dart';
@@ -113,7 +114,7 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search duas...',
                     hintStyle: TextStyle(
-                      color: appBarTextColor.withOpacity(0.62),
+                      color: appBarTextColor.withValues(alpha: 0.62),
                     ),
                     border: InputBorder.none,
                   ),
@@ -189,6 +190,7 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
             ),
           ),
         ),
+        bottomNavigationBar: const BannerAdWidget(),
       ),
     );
   }
