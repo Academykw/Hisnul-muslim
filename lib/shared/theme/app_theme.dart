@@ -56,7 +56,6 @@ class AppTheme {
         seedColor: primaryRed,
         primary: primaryRed,
         secondary: primaryRedLight,
-        brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: primaryRed,
@@ -102,7 +101,6 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
       colorScheme: scheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF151917),
@@ -131,21 +129,30 @@ class AppTheme {
         textColor: darkText,
         subtitleTextStyle: TextStyle(color: darkSubText),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primaryRedSoft,
-        foregroundColor: Color(0xFF2E0705),
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
+      textTheme: ThemeData(brightness: Brightness.dark).textTheme.apply(
+            bodyColor: darkText,
+            displayColor: darkText,
+          ),
+      snackBarTheme: const SnackBarThemeData(
         backgroundColor: darkSurfaceHigh,
-        modalBackgroundColor: darkSurfaceHigh,
+        contentTextStyle: TextStyle(color: darkText),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: darkSurfaceHigh,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      snackBarTheme: const SnackBarThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: darkSurfaceHigh,
-        contentTextStyle: TextStyle(color: darkText),
+        modalBackgroundColor: darkSurfaceHigh,
+      ),
+      sliderTheme: const SliderThemeData(
+        activeTrackColor: primaryRedSoft,
+        thumbColor: primaryRedSoft,
+        inactiveTrackColor: darkDivider,
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryRedSoft,
+        foregroundColor: Color(0xFF2E0705),
       ),
     );
   }

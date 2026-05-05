@@ -5,6 +5,7 @@ import 'core/services/settings_service.dart';
 import 'core/services/prayer_service.dart';
 import 'core/services/audio_service.dart';
 import 'core/services/firebase_service.dart';
+import 'core/services/ad_service.dart';
 import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_theme.dart';
 
@@ -17,6 +18,7 @@ Future<void> main() async {
   final prayerService = PrayerService();
   final audioService = AudioService();
   final firebaseService = FirebaseService();
+  final adService = AdService();
 
   try {
     await settings.init();
@@ -32,18 +34,20 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: prayerService),
         ChangeNotifierProvider.value(value: audioService),
         ChangeNotifierProvider.value(value: firebaseService),
+        Provider.value(value: adService),
       ],
       child: const DeenAzkarApp(),
     ),
   );
 
   // Perform async initializations in the background
-  _initServices(prayerService, firebaseService);
+  _initServices(prayerService, firebaseService, adService);
 }
 
 Future<void> _initServices(
   PrayerService prayer,
   FirebaseService firebase,
+  AdService ads,
 ) async {
   // 1. Orientation
   SystemChrome.setPreferredOrientations([
@@ -51,12 +55,13 @@ Future<void> _initServices(
     DeviceOrientation.portraitDown,
   ]);
 
-  // 2. Firebase (with timeout/error handling to prevent hanging)
+  // 2. Firebase & Ads (with timeout/error handling to prevent hanging)
   try {
     await firebase.init();
     await firebase.fetchDailyInspiration();
+    await ads.init();
   } catch (e) {
-    debugPrint("Firebase init failed or timed out: $e");
+    debugPrint("Firebase/Ads init failed or timed out: $e");
   }
 
   // 3. App Services
@@ -72,15 +77,16 @@ class DeenAzkarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild only when themeMode changes
-    final themeMode = context.select<SettingsService, ThemeMode>((s) => s.themeMode);
+    // Watch settings so the app reacts when theme is loaded/changed
+    final settings = context.watch<SettingsService>();
 
     return MaterialApp(
       title: 'Deen Azkar',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
-      themeMode: themeMode,
+      themeAnimationStyle: AnimationStyle.noAnimation,
+      themeMode: settings.themeMode,
       home: const SplashScreen(),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import '../models/daily_inspiration.dart';
 
@@ -10,6 +11,7 @@ class FirebaseService extends ChangeNotifier {
   FirebaseService._internal();
 
   FirebaseFirestore? _db;
+  FirebaseRemoteConfig? _remoteConfig;
   bool _isInitialized = false;
 
   DailyInspiration? _dailyInspiration;
@@ -32,7 +34,20 @@ class FirebaseService extends ChangeNotifier {
 
     await Firebase.initializeApp().timeout(const Duration(seconds: 10));
     _db = FirebaseFirestore.instance;
+    _remoteConfig = FirebaseRemoteConfig.instance;
+
+    await _remoteConfig?.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(minutes: 1),
+      minimumFetchInterval: const Duration(hours: 1),
+    ));
+
+    await _remoteConfig?.fetchAndActivate();
+
     _isInitialized = true;
+  }
+
+  String getBannerAdUnitId() {
+    return _remoteConfig?.getString('ad_banner_unit_id') ?? '';
   }
 
   Future<void> fetchDailyInspiration() async {
