@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class HijriCalendarScreen extends StatefulWidget {
   const HijriCalendarScreen({super.key});
@@ -51,6 +52,8 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
       ),
       body: Column(
         children: [
+          // Banner Ad at Top
+          const SafeTopBannerAd(),
           _buildHeader(),
           Expanded(
             child: _buildCalendarGrid(),

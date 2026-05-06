@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/share_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../dua_group/dua_group_screen.dart';
 import '../bookmarks/bookmarks_group_screen.dart';
@@ -147,6 +148,14 @@ class AppDrawer extends StatelessWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const SettingsScreen()),
                     );
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.share_rounded,
+                  label: 'Share App',
+                  onTap: () {
+                    Navigator.pop(context);
+                    ShareService.shareApp(context);
                   },
                 ),
                 _DrawerItem(
