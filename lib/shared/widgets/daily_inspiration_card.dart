@@ -2,34 +2,62 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../core/services/share_service.dart';
 import '../../core/models/daily_inspiration.dart';
 import '../theme/app_theme.dart';
 
-class DailyInspirationCard extends StatelessWidget {
+class DailyInspirationCard extends StatefulWidget {
   final DailyInspiration inspiration;
   final bool isLoading;
 
-  DailyInspirationCard({
+  const DailyInspirationCard({
     super.key, 
     required this.inspiration,
     this.isLoading = false,
   });
 
+  @override
+  State<DailyInspirationCard> createState() => _DailyInspirationCardState();
+}
+
+class _DailyInspirationCardState extends State<DailyInspirationCard> {
   final ScreenshotController _screenshotController = ScreenshotController();
+  bool _isCapturing = false;
 
   Future<void> _shareImage() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final imagePath = await _screenshotController.captureAndSave(
-      directory.path,
-      fileName: "daily_inspiration.png",
-    );
-
-    if (imagePath != null) {
-      await Share.shareXFiles(
-        [XFile(imagePath)],
-        text: 'Daily Inspiration from Deen Azkar',
+    if (_isCapturing) return;
+    
+    setState(() => _isCapturing = true);
+    
+    try {
+      // Small delay to ensure UI is settled if needed
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      final directory = await getApplicationDocumentsDirectory();
+      // captureAndSave returns the path of the saved image
+      final String? imagePath = await _screenshotController.captureAndSave(
+        directory.path,
+        fileName: "daily_inspiration_${DateTime.now().millisecondsSinceEpoch}.png",
       );
+
+      if (imagePath != null && mounted) {
+        await ShareService.shareFiles(
+          context,
+          paths: [imagePath],
+          text: 'Daily Inspiration from Deen Azkar',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error capturing screenshot: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to share inspiration image')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isCapturing = false);
+      }
     }
   }
 
@@ -54,7 +82,7 @@ class DailyInspirationCard extends StatelessWidget {
           ),
           AnimatedOpacity(
             duration: const Duration(milliseconds: 500),
-            opacity: isLoading ? 0.6 : 1.0,
+            opacity: widget.isLoading ? 0.6 : 1.0,
             child: Screenshot(
               controller: _screenshotController,
               child: Container(
@@ -101,7 +129,7 @@ class DailyInspirationCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              inspiration.type.toUpperCase(),
+                              widget.inspiration.type.toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -111,11 +139,11 @@ class DailyInspirationCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          if (isLoading && inspiration.id == 'placeholder')
+                          if (widget.isLoading && widget.inspiration.id == 'placeholder')
                             _buildShimmerLine(width: double.infinity)
                           else
                             Text(
-                              inspiration.content,
+                              widget.inspiration.content,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -128,31 +156,37 @@ class DailyInspirationCard extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if (isLoading && inspiration.id == 'placeholder')
+                              if (widget.isLoading && widget.inspiration.id == 'placeholder')
                                 _buildShimmerLine(width: 100)
                               else
                                 Text(
-                                  inspiration.source ?? '',
+                                  widget.inspiration.source ?? '',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.8),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
-                              if (!isLoading)
+                              if (!widget.isLoading)
                                 GestureDetector(
-                                  onTap: _shareImage,
+                                  onTap: _isCapturing ? null : _shareImage,
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
-                                      Icons.share_rounded,
-                                      color: AppTheme.primaryRed,
-                                      size: 20,
-                                    ),
+                                    child: _isCapturing 
+                                      ? const SizedBox(
+                                          width: 20, 
+                                          height: 20, 
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryRed)
+                                        )
+                                      : const Icon(
+                                          Icons.share_rounded,
+                                          color: AppTheme.primaryRed,
+                                          size: 20,
+                                        ),
                                   ),
                                 ),
                             ],
