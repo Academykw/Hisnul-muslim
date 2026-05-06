@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/share_service.dart';
 import '../../core/services/settings_service.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -15,10 +17,15 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          // Theme Section
-          _SectionHeader(label: 'Display'),
+          // Banner Ad at Top
+          const SafeTopBannerAd(),
+          Expanded(
+            child: ListView(
+              children: [
+                // Theme Section
+                _SectionHeader(label: 'Display'),
           ListTile(
             leading: Icon(
               Icons.dark_mode_rounded,
@@ -97,10 +104,24 @@ class SettingsScreen extends StatelessWidget {
                   'In the name of Allah, the Most Gracious, the Most Merciful.',
                   style: TextStyle(fontSize: settings.otherFontSize),
                 ),
-                const SizedBox(height: 16),
-              ],
-            ),
+                const SizedBox(height: 24),
+                const Divider(),
+                _SectionHeader(label: 'Support'),
+                ListTile(
+                  leading: Icon(
+                    Icons.share_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('Share App'),
+                  subtitle: const Text('Recommend this app to others'),
+                  onTap: () => ShareService.shareApp(context),
+                ),
+                const SizedBox(height: 32),
+                ],
+              ),
+            ),]
           ),
+         ),
         ],
       ),
     );
