@@ -67,6 +67,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -88,3 +89,8 @@ flutter:
     - family: UthmanicV09
       fonts:
         - asset: assets/fonts/UthmanTN1 Ver09.otf
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/img/app_icon.png"
+  min_sdk_android: 21
