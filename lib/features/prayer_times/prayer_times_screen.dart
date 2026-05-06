@@ -6,6 +6,7 @@ import 'package:adhan_dart/adhan_dart.dart';
 import 'package:hijri/hijri_calendar.dart';
 import '../../core/services/prayer_service.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
@@ -87,6 +88,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           child: Column(
             children: [
               _buildAppBar(context),
+              // Banner Ad at Top
+              const SafeTopBannerAd(),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),

@@ -37,6 +37,8 @@ class PrayerService extends ChangeNotifier {
   static const String _lastLocationLonKey = 'last_lon';
   static const String _lastLocationAddressKey = 'last_address';
   static const String _lastLocationRefreshKey = 'last_location_refresh_time';
+  static const int _androidDuaReminderScheduleDays = 30;
+  static const int _defaultDuaReminderScheduleDays = 7;
 
   Position? _currentPosition;
   String _currentAddress = "Loading location...";
@@ -561,7 +563,11 @@ class PrayerService extends ChangeNotifier {
 
   Future<void> _scheduleDuaReminders() async {
     final now = DateTime.now();
-    for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+    final scheduleDays = _isAndroid
+        ? _androidDuaReminderScheduleDays
+        : _defaultDuaReminderScheduleDays;
+
+    for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
       final date = now.add(Duration(days: dayOffset));
       final prayers = _prayersFor(date);
       if (prayers.length < 5) continue;
