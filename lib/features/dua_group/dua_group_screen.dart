@@ -167,6 +167,8 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                // Banner Ad at Top
+                const SafeTopBannerAd(),
                 if (firebaseService.dailyInspiration != null)
                   DailyInspirationCard(
                     inspiration: firebaseService.dailyInspiration!,
@@ -190,7 +192,6 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: const BannerAdWidget(),
       ),
     );
   }
