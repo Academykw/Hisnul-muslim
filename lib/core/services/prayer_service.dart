@@ -33,6 +33,10 @@ class PrayerService extends ChangeNotifier {
   static const String stopAdhanPayload = 'stop_adhan';
   static const MethodChannel _adhanAlarmChannel =
       MethodChannel('com.deen.adkhar/adhan_alarm');
+  static const String _lastLocationLatKey = 'last_lat';
+  static const String _lastLocationLonKey = 'last_lon';
+  static const String _lastLocationAddressKey = 'last_address';
+  static const String _lastLocationRefreshKey = 'last_location_refresh_time';
 
   Position? _currentPosition;
   String _currentAddress = "Loading location...";
@@ -48,22 +52,29 @@ class PrayerService extends ChangeNotifier {
   Position? get currentPosition => _currentPosition;
   bool get isLoading => _isLoading;
 
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     tz.initializeTimeZones();
     await _refreshLocalTimezone();
 
     await _initNotifications();
+    await AndroidAlarmManager.initialize();
     await _loadLastShownAdhanKey();
     await _loadSavedLocation();
     _startAdhanWatcher();
-    await AndroidAlarmManager.initialize();
   }
 
   Future<void> completeInitialPrayerSetup() async {
     await requestPermissions();
-    await updateLocation();
+    
+    // Only auto-refresh location if it's the first time or 24+ hours have passed
+    final canAutoRefresh = await _canAutoRefreshLocation();
+    if (canAutoRefresh) {
+      await updateLocation();
+    }
+    
     await refreshDeviceTimeSettings();
   }
 
@@ -93,6 +104,32 @@ class PrayerService extends ChangeNotifier {
     await _requestBatteryOptimizationExemption();
   }
 
+  bool _shouldAutoRefreshLocation() {
+    // Check if location should be auto-refreshed (once per 24 hours)
+    // Return false if it was refreshed less than 24 hours ago
+    return true; // Will be checked in init method
+  }
+
+  Future<bool> _canAutoRefreshLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastRefreshMs = prefs.getInt(_lastLocationRefreshKey);
+
+    if (lastRefreshMs == null) {
+      return true; // First time, allow refresh
+    }
+
+    final lastRefresh = DateTime.fromMillisecondsSinceEpoch(lastRefreshMs);
+    final now = DateTime.now();
+
+    // Only auto-refresh if more than 24 hours have passed
+    return now.difference(lastRefresh).inHours >= 24;
+  }
+
+  Future<void> _saveLocationRefreshTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastLocationRefreshKey, DateTime.now().millisecondsSinceEpoch);
+  }
+
   Future<void> _requestBatteryOptimizationExemption() async {
     if (!_isAndroid) return;
 
@@ -119,6 +156,32 @@ class PrayerService extends ChangeNotifier {
       onDidReceiveNotificationResponse: _handleNotificationResponse,
       onDidReceiveBackgroundNotificationResponse: prayerNotificationTapBackground,
     );
+
+    // Create Notification Channels for Android
+    if (_isAndroid) {
+      final androidImplementation =
+          _notifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+
+      await androidImplementation?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _prayerNotificationChannelId,
+          'Prayer Times Adhan',
+          description: 'Notifications for prayer times with Adhan sound',
+          importance: Importance.max,
+          playSound: true,
+        ),
+      );
+
+      await androidImplementation?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          'dua_reminders_channel',
+          'Dua Reminders',
+          description: 'Reminders for morning and evening azkar',
+          importance: Importance.high,
+        ),
+      );
+    }
   }
 
   void _handleNotificationResponse(NotificationResponse response) {
@@ -135,8 +198,10 @@ class PrayerService extends ChangeNotifier {
 
   Future<void> _loadSavedLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    final lat = prefs.getDouble('last_lat');
-    final lon = prefs.getDouble('last_lon');
+    final lat = prefs.getDouble(_lastLocationLatKey);
+    final lon = prefs.getDouble(_lastLocationLonKey);
+    final address = prefs.getString(_lastLocationAddressKey);
+
     if (lat != null && lon != null) {
       _currentPosition = Position(
         latitude: lat,
@@ -150,6 +215,12 @@ class PrayerService extends ChangeNotifier {
         altitudeAccuracy: 0,
         headingAccuracy: 0,
       );
+
+      // Restore saved address
+      if (address != null) {
+        _currentAddress = address;
+      }
+
       _calculatePrayers();
     }
   }
@@ -187,12 +258,19 @@ class PrayerService extends ChangeNotifier {
     try {
       _currentPosition = await Geolocator.getCurrentPosition();
 
-      // Save location
+      // Save location and address
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble('last_lat', _currentPosition!.latitude);
-      await prefs.setDouble('last_lon', _currentPosition!.longitude);
+      await prefs.setDouble(_lastLocationLatKey, _currentPosition!.latitude);
+      await prefs.setDouble(_lastLocationLonKey, _currentPosition!.longitude);
 
       await _getAddressFromLatLng();
+
+      // Save address for persistence
+      await prefs.setString(_lastLocationAddressKey, _currentAddress);
+
+      // Save refresh timestamp for auto-refresh control
+      await _saveLocationRefreshTime();
+
       _calculatePrayers();
     } catch (e) {
       debugPrint("Error updating location: $e");
@@ -444,6 +522,9 @@ class PrayerService extends ChangeNotifier {
       }
     }
 
+    // Schedule Dua Reminders (Morning/Evening)
+    await _scheduleDuaReminders();
+
     // Schedule a background task to refresh prayers for tomorrow
     // This alarm will fire at 1 AM tomorrow
     final now = DateTime.now();
@@ -476,6 +557,63 @@ class PrayerService extends ChangeNotifier {
     }
 
     await _adhanAlarmChannel.invokeMethod<void>('scheduleAdhanAlarms', alarms);
+  }
+
+  Future<void> _scheduleDuaReminders() async {
+    final now = DateTime.now();
+    for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+      final date = now.add(Duration(days: dayOffset));
+      final prayers = _prayersFor(date);
+      if (prayers.length < 5) continue;
+
+      // Fajr ID: 0, Asr ID: 2
+      final fajr = prayers.firstWhere((p) => p.id == 0).time;
+      final asr = prayers.firstWhere((p) => p.id == 2).time;
+
+      final morningDuaTime = fajr.add(const Duration(minutes: 20));
+      final eveningDuaTime = asr.add(const Duration(hours: 1, minutes: 30));
+
+      final details = _reminderNotificationDetails();
+
+      if (morningDuaTime.isAfter(now)) {
+        await _notifications.zonedSchedule(
+          100 + dayOffset,
+          'Morning Azkar',
+          'It is time for your morning dhikr.',
+          tz.TZDateTime.from(morningDuaTime, tz.local),
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      }
+
+      if (eveningDuaTime.isAfter(now)) {
+        await _notifications.zonedSchedule(
+          200 + dayOffset,
+          'Evening Azkar',
+          'It is time for your evening dhikr.',
+          tz.TZDateTime.from(eveningDuaTime, tz.local),
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      }
+    }
+  }
+
+  NotificationDetails _reminderNotificationDetails() {
+    const android = AndroidNotificationDetails(
+      'dua_reminders_channel',
+      'Dua Reminders',
+      channelDescription: 'Reminders for morning and evening azkar',
+      importance: Importance.high,
+      priority: Priority.high,
+      enableVibration: true,
+    );
+    const ios = DarwinNotificationDetails();
+    return const NotificationDetails(android: android, iOS: ios);
   }
 
   String getNextPrayerName() {
@@ -517,5 +655,3 @@ class _DuePrayer {
   final String name;
   final DateTime time;
 }
-
-
