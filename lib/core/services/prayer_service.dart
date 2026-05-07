@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:adhan_dart/adhan_dart.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
@@ -39,6 +40,7 @@ class PrayerService extends ChangeNotifier {
   static const String _lastLocationRefreshKey = 'last_location_refresh_time';
   static const int _androidDuaReminderScheduleDays = 30;
   static const int _defaultDuaReminderScheduleDays = 7;
+  static const int _fastingReminderBaseId = 3000;
 
   Position? _currentPosition;
   String _currentAddress = "Loading location...";
@@ -561,52 +563,110 @@ class PrayerService extends ChangeNotifier {
     await _adhanAlarmChannel.invokeMethod<void>('scheduleAdhanAlarms', alarms);
   }
 
+  Future<void> refreshDuaReminders() async {
+    await _scheduleDuaReminders();
+  }
+
   Future<void> _scheduleDuaReminders() async {
-    final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('pref_daily_reminders_enabled') ?? true;
+
+    // Clear existing reminders first
     final scheduleDays = _isAndroid
         ? _androidDuaReminderScheduleDays
         : _defaultDuaReminderScheduleDays;
+    for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
+      await _notifications.cancel(100 + dayOffset);
+      await _notifications.cancel(200 + dayOffset);
+      await _notifications.cancel(_fastingReminderBaseId + dayOffset);
+    }
+
+    if (!enabled) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
     for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
-      final date = now.add(Duration(days: dayOffset));
-      final prayers = _prayersFor(date);
-      if (prayers.length < 5) continue;
+      final date = today.add(Duration(days: dayOffset));
 
-      // Fajr ID: 0, Asr ID: 2
-      final fajr = prayers.firstWhere((p) => p.id == 0).time;
-      final asr = prayers.firstWhere((p) => p.id == 2).time;
+      await _scheduleReminderIfFuture(
+        id: 100 + dayOffset,
+        title: 'Morning Azkar',
+        body: 'Start your day with morning adhkar.',
+        scheduledTime: DateTime(date.year, date.month, date.day, 7),
+      );
 
-      final morningDuaTime = fajr.add(const Duration(minutes: 20));
-      final eveningDuaTime = asr.add(const Duration(hours: 1, minutes: 30));
+      await _scheduleReminderIfFuture(
+        id: 200 + dayOffset,
+        title: 'Evening Azkar',
+        body: 'Remember your evening adhkar.',
+        scheduledTime: DateTime(date.year, date.month, date.day, 18),
+      );
 
-      final details = _reminderNotificationDetails();
+      final fastingReason = _fastingReminderReason(date);
+      if (fastingReason == null) continue;
 
-      if (morningDuaTime.isAfter(now)) {
-        await _notifications.zonedSchedule(
-          100 + dayOffset,
-          'Morning Azkar',
-          'It is time for your morning dhikr.',
-          tz.TZDateTime.from(morningDuaTime, tz.local),
-          details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-        );
-      }
-
-      if (eveningDuaTime.isAfter(now)) {
-        await _notifications.zonedSchedule(
-          200 + dayOffset,
-          'Evening Azkar',
-          'It is time for your evening dhikr.',
-          tz.TZDateTime.from(eveningDuaTime, tz.local),
-          details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-        );
-      }
+      final reminderDate = date.subtract(const Duration(days: 1));
+      await _scheduleReminderIfFuture(
+        id: _fastingReminderBaseId + dayOffset,
+        title: 'Fasting Reminder',
+        body: 'Prepare for $fastingReason tomorrow.',
+        scheduledTime: DateTime(
+          reminderDate.year,
+          reminderDate.month,
+          reminderDate.day,
+          20,
+        ),
+      );
     }
+  }
+
+  Future<void> _scheduleReminderIfFuture({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+  }) async {
+    if (!scheduledTime.isAfter(DateTime.now())) return;
+
+    await _notifications.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      _reminderNotificationDetails(),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  String? _fastingReminderReason(DateTime date) {
+    final reasons = <String>[];
+    final hijriDate = HijriCalendar.fromDate(date);
+
+    if (date.weekday == DateTime.monday || date.weekday == DateTime.thursday) {
+      reasons.add('the Sunnah Monday/Thursday fast');
+    }
+
+    if (hijriDate.hDay >= 13 && hijriDate.hDay <= 15) {
+      reasons.add('the white days fast');
+    }
+
+    if (hijriDate.hMonth == 1 && hijriDate.hDay == 9) {
+      reasons.add('Tasu\'a');
+    }
+
+    if (hijriDate.hMonth == 1 && hijriDate.hDay == 10) {
+      reasons.add('Ashura');
+    }
+
+    if (hijriDate.hMonth == 12 && hijriDate.hDay == 9) {
+      reasons.add('the Day of Arafah fast');
+    }
+
+    if (reasons.isEmpty) return null;
+    return reasons.join(' and ');
   }
 
   NotificationDetails _reminderNotificationDetails() {
