@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/prayer_service.dart';
 import '../../core/services/share_service.dart';
 import '../../core/services/settings_service.dart';
 import '../about/about_screen.dart';
@@ -35,6 +36,21 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Theme'),
             subtitle: Text(_themeLabel(settings.theme)),
             onTap: () => _pickTheme(context, settings),
+          ),
+          SwitchListTile(
+            secondary: Icon(
+              Icons.notifications_active_rounded,
+              color: theme.colorScheme.primary,
+            ),
+            title: const Text('Daily reminders'),
+            subtitle: const Text('Azkar and fasting reminders'),
+            value: settings.dailyRemindersEnabled,
+            onChanged: (value) async {
+              await settings.setDailyRemindersEnabled(value);
+              if (context.mounted) {
+                await context.read<PrayerService>().refreshDuaReminders();
+              }
+            },
           ),
 
           const Divider(),
