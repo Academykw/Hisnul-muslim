@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/settings_service.dart';
+import '../../core/services/prayer_service.dart';
 import '../../core/services/firebase_service.dart';
+import '../../core/services/share_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/daily_inspiration_card.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
+import '../about/about_screen.dart';
 import '../bookmarks/bookmarks_group_screen.dart';
 import '../dua_detail/dua_detail_screen.dart';
 import '../categories/category_grid_screen.dart';
-import '../home/home_screen.dart';
+import '../calendar/hijri_calendar_screen.dart';
+import '../prayer_times/prayer_times_screen.dart';
+import '../settings/settings_screen.dart';
+import '../zakat/zakat_calculator_screen.dart';
 
 enum _ViewMode { grid, list }
 
@@ -128,10 +135,13 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
                     fontSize: 20,
                   ),
                 ),
-          leading: Builder(
-            builder: (ctx) => IconButton(
-              icon: Icon(Icons.menu, color: appBarTextColor),
-              onPressed: () => Scaffold.of(ctx).openDrawer(),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/img/app_icon.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           actions: [
@@ -161,7 +171,6 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
             ],
           ],
         ),
-        drawer: const AppDrawer(),
         body: RefreshIndicator(
           onRefresh: () => firebaseService.fetchDailyInspiration(),
           child: SingleChildScrollView(
@@ -190,6 +199,24 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
                         : _buildListView(),
               ],
             ),
+          ),
+        ),
+        bottomNavigationBar: _HomeBottomPanel(
+          onPrayer: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PrayerTimesScreen()),
+          ),
+          onZakat: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
+          ),
+          onHijri: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+          ),
+          onSettings: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
           ),
         ),
       ),
@@ -268,6 +295,335 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
 }
 
 // ─── Option Bar Button ──────────────────────────────────────────────────────
+
+class _HomeBottomPanel extends StatefulWidget {
+  final VoidCallback onPrayer;
+  final VoidCallback onZakat;
+  final VoidCallback onHijri;
+  final VoidCallback onSettings;
+
+  const _HomeBottomPanel({
+    required this.onPrayer,
+    required this.onZakat,
+    required this.onHijri,
+    required this.onSettings,
+  });
+
+  @override
+  State<_HomeBottomPanel> createState() => _HomeBottomPanelState();
+}
+
+class _HomeBottomPanelState extends State<_HomeBottomPanel>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.35),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? theme.colorScheme.surface : const Color(0xFFFFFBF4);
+    final settings = context.watch<SettingsService>();
+    final prayerService = context.read<PrayerService>();
+    final isEnabled = settings.dailyRemindersEnabled;
+
+    return SafeArea(
+      top: false,
+      child: FadeTransition(
+        opacity: _fade,
+        child: SlideTransition(
+          position: _slide,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.12),
+                  blurRadius: 24,
+                  offset: const Offset(0, -8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isEnabled
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Icon(
+                          Icons.notifications_active_rounded,
+                          color: isEnabled 
+                              ? AppTheme.accentGold 
+                              : theme.colorScheme.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Daily Reminder',
+                              style: TextStyle(
+                                color: isEnabled
+                                    ? theme.colorScheme.onPrimary
+                                    : theme.colorScheme.onSurface,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Don't miss your daily adhkar",
+                              style: TextStyle(
+                                color: isEnabled
+                                    ? theme.colorScheme.onPrimary.withValues(alpha: 0.82)
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: isEnabled,
+                        activeColor: theme.colorScheme.onPrimary,
+                        activeTrackColor: AppTheme.accentGold.withValues(alpha: 0.8),
+                        inactiveThumbColor: theme.colorScheme.outline,
+                        inactiveTrackColor:
+                            theme.colorScheme.surfaceContainerHighest,
+                        onChanged: (value) async {
+                          await settings.setDailyRemindersEnabled(value);
+                          await prayerService.refreshDuaReminders();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _BottomNavAction(
+                        icon: Icons.access_time_rounded,
+                        label: 'Prayer',
+                        onTap: widget.onPrayer,
+                      ),
+                    ),
+                    Expanded(
+                      child: _BottomNavAction(
+                        icon: Icons.calendar_month_rounded,
+                        label: 'Hijri',
+                        onTap: widget.onHijri,
+                      ),
+                    ),
+                    Expanded(
+                      child: _BottomNavAction(
+                        icon: Icons.calculate_rounded,
+                        label: 'Zakat',
+                        onTap: widget.onZakat,
+                      ),
+                    ),
+                    Expanded(
+                      child: _BottomNavAction(
+                        icon: Icons.settings_rounded,
+                        label: 'Settings',
+                        onTap: widget.onSettings,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavAction extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BottomNavAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  @override
+  State<_BottomNavAction> createState() => _BottomNavActionState();
+}
+
+class _BottomNavActionState extends State<_BottomNavAction>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 130),
+      lowerBound: 0.9,
+      upperBound: 1,
+      value: 1,
+    );
+    _scale = _controller;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedColor = theme.colorScheme.primary;
+    final color = widget.selected
+        ? selectedColor
+        : theme.colorScheme.onSurfaceVariant;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _controller.reverse(),
+      onTapCancel: () => _controller.forward(),
+      onTapUp: (_) {
+        _controller.forward();
+        widget.onTap();
+      },
+      child: ScaleTransition(
+        scale: _scale,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: widget.selected
+                      ? selectedColor.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(widget.icon, color: color, size: 23),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight:
+                      widget.selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MoreTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: theme.colorScheme.primary),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+      onTap: onTap,
+    );
+  }
+}
 
 class _OptionButton extends StatefulWidget {
   final IconData icon;

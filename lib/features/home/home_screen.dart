@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../core/services/share_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../dua_group/dua_group_screen.dart';
-import '../bookmarks/bookmarks_group_screen.dart';
 import '../prayer_times/prayer_times_screen.dart';
 import '../calendar/hijri_calendar_screen.dart';
-import '../about/about_screen.dart';
 import '../settings/settings_screen.dart';
 import '../zakat/zakat_calculator_screen.dart';
 
@@ -39,8 +36,8 @@ class AppDrawer extends StatelessWidget {
               left: 20,
               right: 20,
             ),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -117,17 +114,6 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
                 _DrawerItem(
-                  icon: Icons.calendar_today_rounded,
-                  label: 'Hijri Calendar',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
                   icon: Icons.calculate_rounded,
                   label: 'Zakat Calculator',
                   onTap: () {
@@ -135,6 +121,17 @@ class AppDrawer extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
+                    );
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.calendar_today_rounded,
+                  label: 'Hijri Calendar',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
                     );
                   },
                 ),
@@ -147,25 +144,6 @@ class AppDrawer extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.share_rounded,
-                  label: 'Share App',
-                  onTap: () {
-                    Navigator.pop(context);
-                    ShareService.shareApp(context);
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.info_outline_rounded,
-                  label: 'About',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AboutScreen()),
                     );
                   },
                 ),
