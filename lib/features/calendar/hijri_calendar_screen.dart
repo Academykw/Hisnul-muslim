@@ -50,6 +50,9 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
     required DateTime? gregDate,
   }) {
     final events = <_IslamicCalendarEvent>[];
+    final blocksVoluntaryFast =
+        (hijriMonth == 10 && hijriDay == 1) ||
+        (hijriMonth == 12 && hijriDay >= 10 && hijriDay <= 13);
 
     for (final event in _fixedIslamicEvents) {
       if (event.hijriMonth == hijriMonth && event.hijriDay == hijriDay) {
@@ -57,7 +60,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
       }
     }
 
-    if (hijriDay >= 13 && hijriDay <= 15) {
+    if (!blocksVoluntaryFast && hijriDay >= 13 && hijriDay <= 15) {
       events.add(
         const _IslamicCalendarEvent(
           title: 'White Days',
@@ -68,6 +71,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
     }
 
     if (gregDate != null &&
+        !blocksVoluntaryFast &&
         (gregDate.weekday == DateTime.monday ||
             gregDate.weekday == DateTime.thursday)) {
       events.add(
@@ -372,71 +376,151 @@ class _CalendarDayTile extends StatelessWidget {
 
     final backgroundColor = isToday
         ? AppTheme.primaryRed
-        : (events.any((event) => event.type == _IslamicEventType.eid)
-            ? AppTheme.primaryRed.withValues(alpha: isDark ? 0.25 : 0.1)
-            : events.isNotEmpty
-                ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.08)
-                : (isWeekend
-            ? AppTheme.primaryRed.withValues(alpha: isDark ? 0.15 : 0.05)
-                    : (theme.cardTheme.color ?? (isDark ? Colors.white10 : Colors.white))));
+        : _backgroundColor(theme, isDark);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(10),
-        border: isToday ? null : Border.all(color: theme.dividerColor.withValues(alpha: 0.08)),
-        boxShadow: isToday ? [
-          BoxShadow(
-            color: AppTheme.primaryRed.withValues(alpha: 0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          )
-        ] : null,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '$hijriDay',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: isToday ? Colors.white : theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '$gregDay',
-            style: TextStyle(
-              fontSize: 10,
-              color: isToday
-                  ? Colors.white.withValues(alpha: 0.8)
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-          ),
-          if (events.isNotEmpty) ...[
-            const SizedBox(height: 3),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 2,
-              runSpacing: 2,
-              children: events
-                  .take(3)
-                  .map(
-                    (event) => Container(
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: isToday ? Colors.white : event.color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+    return GestureDetector(
+      onTap: events.isEmpty ? null : () => _showEvents(context),
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+          border: isToday
+              ? null
+              : Border.all(color: theme.dividerColor.withValues(alpha: 0.08)),
+          boxShadow: isToday
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primaryRed.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   )
-                  .toList(),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '$hijriDay',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: isToday ? Colors.white : theme.colorScheme.onSurface,
+              ),
             ),
+            const SizedBox(height: 2),
+            Text(
+              '$gregDay',
+              style: TextStyle(
+                fontSize: 10,
+                color: isToday
+                    ? Colors.white.withValues(alpha: 0.8)
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+            if (events.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Text(
+                  _tileEventLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 7,
+                    fontWeight: FontWeight.w700,
+                    color: isToday ? Colors.white : events.first.color,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 2,
+                runSpacing: 2,
+                children: events
+                    .take(3)
+                    .map(
+                      (event) => Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isToday ? Colors.white : event.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
+    );
+  }
+
+  Color _backgroundColor(ThemeData theme, bool isDark) {
+    if (events.any((event) => event.type == _IslamicEventType.eid)) {
+      return AppTheme.primaryRed.withValues(alpha: isDark ? 0.25 : 0.1);
+    }
+
+    if (events.isNotEmpty) {
+      return theme.colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.08);
+    }
+
+    if (isWeekend) {
+      return AppTheme.primaryRed.withValues(alpha: isDark ? 0.15 : 0.05);
+    }
+
+    return theme.cardTheme.color ?? (isDark ? Colors.white10 : Colors.white);
+  }
+
+  String get _tileEventLabel {
+    if (events.any((event) => event.type == _IslamicEventType.eid)) {
+      return 'Eid';
+    }
+    if (events.any((event) => event.type == _IslamicEventType.fast)) {
+      return 'Fast';
+    }
+    return events.first.title;
+  }
+
+  void _showEvents(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hijri day $hijriDay',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                for (final event in events)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      event.icon,
+                      color: event.color,
+                    ),
+                    title: Text(event.title),
+                    subtitle: Text(event.note),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -468,20 +552,25 @@ class _IslamicCalendarEvent {
         return const Color(0xFF1565C0);
     }
   }
+
+  IconData get icon {
+    switch (type) {
+      case _IslamicEventType.eid:
+        return Icons.celebration_rounded;
+      case _IslamicEventType.fast:
+        return Icons.nights_stay_rounded;
+      case _IslamicEventType.event:
+        return Icons.event_rounded;
+    }
+  }
 }
 
 const List<_IslamicCalendarEvent> _fixedIslamicEvents = [
-  _IslamicCalendarEvent(
-    hijriMonth: 1,
-    hijriDay: 1,
-    title: 'Islamic New Year',
-    note: '1 Muharram',
-    type: _IslamicEventType.event,
-  ),
+
   _IslamicCalendarEvent(
     hijriMonth: 1,
     hijriDay: 9,
-    title: 'Tasu'a',
+    title: 'Tasu\'a',
     note: 'Recommended fast',
     type: _IslamicEventType.fast,
   ),
@@ -492,13 +581,7 @@ const List<_IslamicCalendarEvent> _fixedIslamicEvents = [
     note: 'Recommended fast',
     type: _IslamicEventType.fast,
   ),
-  _IslamicCalendarEvent(
-    hijriMonth: 3,
-    hijriDay: 12,
-    title: 'Mawlid',
-    note: '12 Rabi al-awwal',
-    type: _IslamicEventType.event,
-  ),
+
   _IslamicCalendarEvent(
     hijriMonth: 7,
     hijriDay: 27,
@@ -506,13 +589,7 @@ const List<_IslamicCalendarEvent> _fixedIslamicEvents = [
     note: 'Common observance',
     type: _IslamicEventType.event,
   ),
-  _IslamicCalendarEvent(
-    hijriMonth: 8,
-    hijriDay: 15,
-    title: 'Mid-Sha\'ban',
-    note: 'Common observance',
-    type: _IslamicEventType.event,
-  ),
+
   _IslamicCalendarEvent(
     hijriMonth: 9,
     hijriDay: 1,
@@ -522,7 +599,70 @@ const List<_IslamicCalendarEvent> _fixedIslamicEvents = [
   ),
   _IslamicCalendarEvent(
     hijriMonth: 9,
+    hijriDay: 20,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten  nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 21,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten odd nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 22,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten  nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 23,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten odd nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 24,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten  nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 25,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten odd nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 26,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten  nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
     hijriDay: 27,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten odd nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 28,
+    title: 'Laylat al-Qadr',
+    note: 'Likely night among last ten nights',
+    type: _IslamicEventType.event,
+  ),
+  _IslamicCalendarEvent(
+    hijriMonth: 9,
+    hijriDay: 29,
     title: 'Laylat al-Qadr',
     note: 'Likely night among last ten odd nights',
     type: _IslamicEventType.event,
