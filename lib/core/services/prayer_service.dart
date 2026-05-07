@@ -66,6 +66,7 @@ class PrayerService extends ChangeNotifier {
     await _initNotifications();
     await AndroidAlarmManager.initialize();
     await _loadLastShownAdhanKey();
+    await _scheduleDuaReminders();
     await _loadSavedLocation();
     _startAdhanWatcher();
   }
@@ -644,12 +645,21 @@ class PrayerService extends ChangeNotifier {
   String? _fastingReminderReason(DateTime date) {
     final reasons = <String>[];
     final hijriDate = HijriCalendar.fromDate(date);
+    final blocksVoluntaryFast =
+        (hijriDate.hMonth == 10 && hijriDate.hDay == 1) ||
+        (hijriDate.hMonth == 12 &&
+            hijriDate.hDay >= 10 &&
+            hijriDate.hDay <= 13);
 
-    if (date.weekday == DateTime.monday || date.weekday == DateTime.thursday) {
+    if (!blocksVoluntaryFast &&
+        (date.weekday == DateTime.monday ||
+            date.weekday == DateTime.thursday)) {
       reasons.add('the Sunnah Monday/Thursday fast');
     }
 
-    if (hijriDate.hDay >= 13 && hijriDate.hDay <= 15) {
+    if (!blocksVoluntaryFast &&
+        hijriDate.hDay >= 13 &&
+        hijriDate.hDay <= 15) {
       reasons.add('the white days fast');
     }
 
