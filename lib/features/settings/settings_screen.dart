@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/share_service.dart';
 import '../../core/services/settings_service.dart';
+import '../about/about_screen.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
 
@@ -115,6 +116,18 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Share App'),
                   subtitle: const Text('Recommend this app to others'),
                   onTap: () => ShareService.shareApp(context),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.info_outline_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('About'),
+                  subtitle: const Text('App information and features'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 ],
