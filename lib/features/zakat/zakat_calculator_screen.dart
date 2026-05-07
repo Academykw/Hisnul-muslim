@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class ZakatCalculatorScreen extends StatefulWidget {
   const ZakatCalculatorScreen({super.key});
@@ -73,6 +74,9 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Banner Ad at Top
+            const SafeTopBannerAd(),
+            const SizedBox(height: 16),
             // Currency
             Card(
               child: Padding(
