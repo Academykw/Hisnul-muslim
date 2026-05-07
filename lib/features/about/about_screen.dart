@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/services/share_service.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/banner_ad_widget.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -11,12 +13,21 @@ class AboutScreen extends StatelessWidget {
         title: const Text('About'),
         backgroundColor: AppTheme.primaryRed,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_rounded),
+            onPressed: () => ShareService.shareApp(context),
+            tooltip: 'Share App',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Banner Ad at Top
+            const SafeTopBannerAd(),
             const SizedBox(height: 20),
             Container(
               width: 100,
@@ -87,6 +98,17 @@ class AboutScreen extends StatelessWidget {
                   'All content has been sourced from authentic Islamic texts. '
                   'We ask Allah to accept this effort and make it beneficial '
                   'for all Muslims.',
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => ShareService.shareApp(context),
+              icon: const Icon(Icons.share_rounded),
+              label: const Text('Share This App'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
             const SizedBox(height: 24),
             const Text(
