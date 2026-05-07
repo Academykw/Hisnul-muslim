@@ -83,3 +83,27 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     return const SizedBox.shrink();
   }
 }
+
+/// Wrapper widget for safe top banner ad placement with visual separation
+class SafeTopBannerAd extends StatelessWidget {
+  const SafeTopBannerAd({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Top padding to prevent accidental clicks
+        const SizedBox(height: 8),
+        // Banner Ad
+        const BannerAdWidget(),
+        // Bottom padding and visual separator
+        Container(
+          height: 1,
+          color: Colors.grey.withValues(alpha: 0.1),
+        ),
+      ],
+    );
+  }
+}
+
