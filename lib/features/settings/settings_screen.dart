@@ -48,7 +48,9 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) async {
               await settings.setDailyRemindersEnabled(value);
               if (context.mounted) {
-                await context.read<PrayerService>().refreshDuaReminders();
+                await context.read<PrayerService>().refreshDuaReminders(
+                      requestNotificationPermission: value,
+                    );
               }
             },
           ),
