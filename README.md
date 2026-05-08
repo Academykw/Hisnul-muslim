@@ -8,17 +8,17 @@ A complete Flutter rewrite of the **Deen Azkar (Daily Duas & Adhkar)** Android a
 
 | Feature | Details |
 |---|---|
-| 📖 Duas List | All 135+ duas from the original SQLite database |
-| 🗂️ Categories Grid | 10 category tiles with background images (Illness, Prayer, Travel, etc.) |
-| 🔍 Search | Real-time search of dua titles |
-| ⭐ Bookmarks | Favorite individual duas, browse by bookmarked group |
-| 🔊 Audio | Per-dua audio playback with seekbar (just_audio) |
-| 🌙 Dark Mode | System / Light / Dark theme switching |
-| 📏 Font Settings | Adjustable Arabic and translation font sizes |
-| 💰 Zakat Calculator | Full calculator with currency selection |
-| 🤝 Share | Share any dua via the system share sheet |
-| 🎬 Animations | Button press scale animations throughout |
-| 🚀 Splash / Onboarding | Animated splash + 3-page onboarding |
+|  Duas List | All 135+ duas from the original SQLite database |
+|  Categories Grid | 10 category tiles with background images (Illness, Prayer, Travel, etc.) |
+|  Search | Real-time search of dua titles |
+|  Bookmarks | Favorite individual duas, browse by bookmarked group |
+|  Audio | Per-dua audio playback with seekbar (just_audio) |
+|  Dark Mode | System / Light / Dark theme switching |
+|  Font Settings | Adjustable Arabic and translation font sizes |
+|  Zakat Calculator | Full calculator with currency selection |
+|  Share | Share any dua via the system share sheet |
+|  Animations | Button press scale animations throughout |
+|  Splash / Onboarding | Animated splash + 3-page onboarding |
 
 ---
 
@@ -75,26 +75,17 @@ lib/
 flutter pub get
 ```
 
-### 3. Copy original assets from the Java project
 
-Copy these from the original Java project into the Flutter `assets/` folder:
-
-| From Java project | To Flutter |
-|---|---|
-| `app/src/main/assets/hisnul.sqlite3` | `assets/db/hisnul.sqlite3` |
-| `app/src/main/assets/img/*.png` | `assets/img/` |
-| `app/src/main/assets/fonts_2/DroidNaskh.ttf` | `assets/fonts/DroidNaskh.ttf` |
-| `app/src/main/assets/audio/a*.mp3` | `assets/audio/` |
 
 > **Note:** The audio files (a1.mp3 – a135.mp3) are required for audio playback. The app will show a snackbar if an audio file is missing for a dua — it won't crash.
 
-### 4. Android permissions (android/app/src/main/AndroidManifest.xml)
+### 3. Android permissions (android/app/src/main/AndroidManifest.xml)
 ```xml
 <uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 ```
 
-### 5. Run
+### 4. Run
 ```bash
 flutter run
 ```
@@ -107,7 +98,7 @@ flutter run
 - **Database:** `sqflite` — database is bundled in assets and copied to the app's documents directory on first launch (same approach as the Java `ExternalDbOpenHelper`)
 - **Audio:** `just_audio` — one `AudioPlayer` per dua card, stopped when another starts
 - **Animations:** `AnimationController` with `ScaleTransition` on all interactive buttons — tap-down shrinks, tap-up bounces back
-- **No ads:** Ad code removed; easy to re-add with `google_mobile_ads` if needed
+  
 
 ---
 
