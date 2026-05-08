@@ -38,7 +38,20 @@ class PrayerService extends ChangeNotifier {
   static const String _lastLocationLonKey = 'last_lon';
   static const String _lastLocationAddressKey = 'last_address';
   static const String _lastLocationRefreshKey = 'last_location_refresh_time';
-  static const int _androidDuaReminderScheduleDays = 30;
+  static const String _lastLocationAccuracyKey = 'last_location_accuracy';
+  static const String _lastLocationAltitudeKey = 'last_location_altitude';
+  static const String _lastLocationHeadingKey = 'last_location_heading';
+  static const String _lastLocationSpeedKey = 'last_location_speed';
+  static const String _lastLocationSpeedAccuracyKey =
+      'last_location_speed_accuracy';
+  static const String _lastLocationAltitudeAccuracyKey =
+      'last_location_altitude_accuracy';
+  static const String _lastLocationHeadingAccuracyKey =
+      'last_location_heading_accuracy';
+  static const String _lastLocationTimestampKey = 'last_location_timestamp';
+  static const String _lastLocationFloorKey = 'last_location_floor';
+  static const String _lastLocationIsMockedKey = 'last_location_is_mocked';
+  static const int _androidDuaReminderScheduleDays = 7;
   static const int _defaultDuaReminderScheduleDays = 7;
   static const int _fastingReminderBaseId = 3000;
 
@@ -46,6 +59,7 @@ class PrayerService extends ChangeNotifier {
   String _currentAddress = "Loading location...";
   PrayerTimes? _prayerTimes;
   bool _isLoading = false;
+  bool _notificationsReady = false;
   Timer? _adhanWatcher;
   String? _lastShownAdhanKey;
   final AudioPlayer _adhanPlayer = AudioPlayer();
@@ -59,16 +73,26 @@ class PrayerService extends ChangeNotifier {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> init() async {
+  Future<void> init({bool requestPermissions = true}) async {
     tz.initializeTimeZones();
     await _refreshLocalTimezone();
 
     await _initNotifications();
     await AndroidAlarmManager.initialize();
+    _notificationsReady = true;
     await _loadLastShownAdhanKey();
-    await _scheduleDuaReminders();
-    await _loadSavedLocation();
+    await restoreCachedLocation(scheduleNotifications: false);
+    await _scheduleDuaReminders(requestNotificationPermission: requestPermissions);
     _startAdhanWatcher();
+  }
+
+  Future<void> restoreCachedLocation({
+    bool scheduleNotifications = false,
+  }) async {
+    final restored = await _loadSavedLocation(
+      scheduleNotifications: scheduleNotifications,
+    );
+    if (restored) notifyListeners();
   }
 
   Future<void> completeInitialPrayerSetup() async {
@@ -92,14 +116,22 @@ class PrayerService extends ChangeNotifier {
   }
 
   Future<void> _refreshLocalTimezone() async {
-    final timeZoneName = (await FlutterTimezone.getLocalTimezone()).identifier;
-    tz.setLocalLocation(tz.getLocation(timeZoneName));
+    try {
+      final res = await FlutterTimezone.getLocalTimezone();
+      // res is TimezoneInfo object from flutter_timezone 5.0.2
+      final String timeZoneName = res.identifier;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      debugPrint('Local timezone set to: $timeZoneName');
+    } catch (e) {
+      debugPrint('Failed to set local timezone: $e. Falling back to UTC.');
+      try {
+        tz.setLocalLocation(tz.getLocation('UTC'));
+      } catch (_) {}
+    }
   }
 
   Future<void> requestPermissions() async {
-    await _notifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    await requestNotificationPermission();
 
     // Also request exact alarm permission for Android 12+
     await _notifications.resolvePlatformSpecificImplementation<
@@ -107,6 +139,41 @@ class PrayerService extends ChangeNotifier {
         ?.requestExactAlarmsPermission();
 
     await _requestBatteryOptimizationExemption();
+  }
+
+  Future<bool> requestNotificationPermission() async {
+    if (!_isAndroid) return true;
+
+    final androidImplementation =
+        _notifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    final granted =
+        await androidImplementation?.requestNotificationsPermission();
+    final enabled = await androidImplementation?.areNotificationsEnabled();
+    return enabled ?? granted ?? false;
+  }
+
+  Future<bool> _notificationsAllowed({
+    required bool requestIfNeeded,
+  }) async {
+    if (!_isAndroid) return true;
+
+    final androidImplementation =
+        _notifications.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    var enabled = await androidImplementation?.areNotificationsEnabled();
+
+    if (enabled != true && requestIfNeeded) {
+      await androidImplementation?.requestNotificationsPermission();
+      await Future.delayed(const Duration(milliseconds: 500));
+      enabled = await androidImplementation?.areNotificationsEnabled();
+    }
+
+    if (enabled != true) {
+      debugPrint('Notifications are disabled; azkar reminders cannot show.');
+    }
+
+    return enabled ?? false;
   }
 
   bool _shouldAutoRefreshLocation() {
@@ -180,10 +247,10 @@ class PrayerService extends ChangeNotifier {
 
       await androidImplementation?.createNotificationChannel(
         const AndroidNotificationChannel(
-          'dua_reminders_channel',
+          'dua_reminders_channel_v4',
           'Dua Reminders',
           description: 'Reminders for morning and evening azkar',
-          importance: Importance.high,
+          importance: Importance.max,
         ),
       );
     }
@@ -201,33 +268,42 @@ class PrayerService extends ChangeNotifier {
     _lastShownAdhanKey = prefs.getString(_lastAdhanNotificationKey);
   }
 
-  Future<void> _loadSavedLocation() async {
+  Future<bool> _loadSavedLocation({
+    required bool scheduleNotifications,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final lat = prefs.getDouble(_lastLocationLatKey);
     final lon = prefs.getDouble(_lastLocationLonKey);
     final address = prefs.getString(_lastLocationAddressKey);
 
-    if (lat != null && lon != null) {
-      _currentPosition = Position(
-        latitude: lat,
-        longitude: lon,
-        timestamp: DateTime.now(),
-        accuracy: 0,
-        altitude: 0,
-        heading: 0,
-        speed: 0,
-        speedAccuracy: 0,
-        altitudeAccuracy: 0,
-        headingAccuracy: 0,
-      );
+    if (lat == null || lon == null) return false;
 
-      // Restore saved address
-      if (address != null) {
-        _currentAddress = address;
-      }
+    final timestampMs = prefs.getInt(_lastLocationTimestampKey);
+    _currentPosition = Position(
+      latitude: lat,
+      longitude: lon,
+      timestamp: timestampMs == null
+          ? DateTime.now()
+          : DateTime.fromMillisecondsSinceEpoch(timestampMs),
+      accuracy: prefs.getDouble(_lastLocationAccuracyKey) ?? 0,
+      altitude: prefs.getDouble(_lastLocationAltitudeKey) ?? 0,
+      heading: prefs.getDouble(_lastLocationHeadingKey) ?? 0,
+      speed: prefs.getDouble(_lastLocationSpeedKey) ?? 0,
+      speedAccuracy: prefs.getDouble(_lastLocationSpeedAccuracyKey) ?? 0,
+      altitudeAccuracy:
+          prefs.getDouble(_lastLocationAltitudeAccuracyKey) ?? 0,
+      headingAccuracy:
+          prefs.getDouble(_lastLocationHeadingAccuracyKey) ?? 0,
+      floor: prefs.getInt(_lastLocationFloorKey),
+      isMocked: prefs.getBool(_lastLocationIsMockedKey) ?? false,
+    );
 
-      _calculatePrayers();
-    }
+    _currentAddress = (address == null || address.trim().isEmpty)
+        ? _formatCoordinates(lat, lon)
+        : address;
+
+    _calculatePrayers(scheduleNotifications: scheduleNotifications);
+    return true;
   }
 
   Future<void> updateLocation() async {
@@ -263,20 +339,16 @@ class PrayerService extends ChangeNotifier {
     try {
       _currentPosition = await Geolocator.getCurrentPosition();
 
-      // Save location and address
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble(_lastLocationLatKey, _currentPosition!.latitude);
-      await prefs.setDouble(_lastLocationLonKey, _currentPosition!.longitude);
+      _currentAddress = _formatCoordinates(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
+      await _saveCachedLocation();
+      _calculatePrayers();
+      notifyListeners();
 
       await _getAddressFromLatLng();
-
-      // Save address for persistence
-      await prefs.setString(_lastLocationAddressKey, _currentAddress);
-
-      // Save refresh timestamp for auto-refresh control
-      await _saveLocationRefreshTime();
-
-      _calculatePrayers();
+      await _saveCachedLocation();
     } catch (e) {
       debugPrint("Error updating location: $e");
     } finally {
@@ -292,13 +364,63 @@ class PrayerService extends ChangeNotifier {
         _currentPosition!.longitude,
       );
       Placemark place = placemarks[0];
-      _currentAddress = "${place.locality}, ${place.country}";
+      final parts = [
+        place.locality,
+        place.administrativeArea,
+        place.country,
+      ].where((part) => part != null && part.trim().isNotEmpty);
+      final resolvedAddress = parts.join(', ');
+      if (resolvedAddress.isNotEmpty) {
+        _currentAddress = resolvedAddress;
+      }
     } catch (e) {
-      _currentAddress = "Unknown Location";
+      debugPrint("Error resolving location address: $e");
     }
   }
 
-  void _calculatePrayers() {
+  Future<void> _saveCachedLocation() async {
+    final position = _currentPosition;
+    if (position == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_lastLocationLatKey, position.latitude);
+    await prefs.setDouble(_lastLocationLonKey, position.longitude);
+    await prefs.setDouble(_lastLocationAccuracyKey, position.accuracy);
+    await prefs.setDouble(_lastLocationAltitudeKey, position.altitude);
+    await prefs.setDouble(_lastLocationHeadingKey, position.heading);
+    await prefs.setDouble(_lastLocationSpeedKey, position.speed);
+    await prefs.setDouble(
+      _lastLocationSpeedAccuracyKey,
+      position.speedAccuracy,
+    );
+    await prefs.setDouble(
+      _lastLocationAltitudeAccuracyKey,
+      position.altitudeAccuracy,
+    );
+    await prefs.setDouble(
+      _lastLocationHeadingAccuracyKey,
+      position.headingAccuracy,
+    );
+    await prefs.setInt(
+      _lastLocationTimestampKey,
+      position.timestamp.millisecondsSinceEpoch,
+    );
+    final floor = position.floor;
+    if (floor == null) {
+      await prefs.remove(_lastLocationFloorKey);
+    } else {
+      await prefs.setInt(_lastLocationFloorKey, floor);
+    }
+    await prefs.setBool(_lastLocationIsMockedKey, position.isMocked);
+    await prefs.setString(_lastLocationAddressKey, _currentAddress);
+    await _saveLocationRefreshTime();
+  }
+
+  String _formatCoordinates(double latitude, double longitude) {
+    return '${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)}';
+  }
+
+  void _calculatePrayers({bool scheduleNotifications = true}) {
     if (_currentPosition == null) return;
 
     final myCoordinates =
@@ -313,13 +435,15 @@ class PrayerService extends ChangeNotifier {
       precision: true,
     );
 
-    _schedulePrayerNotifications();
+    if (scheduleNotifications) {
+      _schedulePrayerNotifications();
+    }
   }
 
   @pragma('vm:entry-point')
   static void alarmCallback() async {
     final service = PrayerService();
-    await service.init();
+    await service.init(requestPermissions: false);
   }
 
   void _startAdhanWatcher() {
@@ -500,35 +624,39 @@ class PrayerService extends ChangeNotifier {
   }
 
   Future<void> _schedulePrayerNotifications() async {
-    if (_prayerTimes == null) return;
+    if (_prayerTimes == null || !_notificationsReady) return;
 
     // Clear existing notifications
     await _notifications.cancelAll();
 
     final prayers = _prayersForCurrentDay();
 
-    if (_isAndroid) {
-      await _scheduleNativeAdhanAlarms();
-    } else {
-      for (final prayer in prayers) {
-        if (!prayer.time.isAfter(DateTime.now())) continue;
+    try {
+      if (_isAndroid) {
+        await _scheduleNativeAdhanAlarms();
+      } else {
+        for (final prayer in prayers) {
+          if (!prayer.time.isAfter(DateTime.now())) continue;
 
-        await _notifications.zonedSchedule(
-          prayer.id,
-          'Prayer Time',
-          'It is time for ${prayer.name}',
-          tz.TZDateTime.from(prayer.time, tz.local),
-          _prayerNotificationDetails(playNotificationSound: true),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          payload: stopAdhanPayload,
-        );
+          await _notifications.zonedSchedule(
+            prayer.id,
+            'Prayer Time',
+            'It is time for ${prayer.name}',
+            tz.TZDateTime.from(prayer.time, tz.local),
+            _prayerNotificationDetails(playNotificationSound: true),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            payload: stopAdhanPayload,
+          );
+        }
       }
+    } catch (e) {
+      debugPrint('Prayer notification scheduling failed: $e');
     }
 
     // Schedule Dua Reminders (Morning/Evening)
-    await _scheduleDuaReminders();
+    await _scheduleDuaReminders(requestNotificationPermission: false);
 
     // Schedule a background task to refresh prayers for tomorrow
     // This alarm will fire at 1 AM tomorrow
@@ -537,7 +665,7 @@ class PrayerService extends ChangeNotifier {
 
     await AndroidAlarmManager.oneShotAt(
       tomorrow,
-      1,
+      999,
       alarmCallback,
       exact: true,
       wakeup: true,
@@ -564,19 +692,25 @@ class PrayerService extends ChangeNotifier {
     await _adhanAlarmChannel.invokeMethod<void>('scheduleAdhanAlarms', alarms);
   }
 
-  Future<void> refreshDuaReminders() async {
-    await _scheduleDuaReminders();
+  Future<void> refreshDuaReminders({
+    bool requestNotificationPermission = false,
+  }) async {
+    if (!_notificationsReady) return;
+    await _scheduleDuaReminders(
+      requestNotificationPermission: requestNotificationPermission,
+    );
   }
 
-  Future<void> _scheduleDuaReminders() async {
+  Future<void> _scheduleDuaReminders({
+    bool requestNotificationPermission = true,
+  }) async {
+    if (!_notificationsReady) return;
+
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('pref_daily_reminders_enabled') ?? true;
 
-    // Clear existing reminders first
-    final scheduleDays = _isAndroid
-        ? _androidDuaReminderScheduleDays
-        : _defaultDuaReminderScheduleDays;
-    for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
+    // Clear existing reminders first (up to 30 to clean up old ones)
+    for (var dayOffset = 0; dayOffset < 30; dayOffset++) {
       await _notifications.cancel(100 + dayOffset);
       await _notifications.cancel(200 + dayOffset);
       await _notifications.cancel(_fastingReminderBaseId + dayOffset);
@@ -584,8 +718,16 @@ class PrayerService extends ChangeNotifier {
 
     if (!enabled) return;
 
+    final notificationsAllowed = await _notificationsAllowed(
+      requestIfNeeded: requestNotificationPermission,
+    );
+    if (!notificationsAllowed) return;
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final scheduleDays = _isAndroid
+        ? _androidDuaReminderScheduleDays
+        : _defaultDuaReminderScheduleDays;
 
     for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
       final date = today.add(Duration(days: dayOffset));
@@ -594,14 +736,14 @@ class PrayerService extends ChangeNotifier {
         id: 100 + dayOffset,
         title: 'Morning Azkar',
         body: 'Start your day with morning adhkar.',
-        scheduledTime: DateTime(date.year, date.month, date.day, 7),
+        scheduledTime: DateTime(date.year, date.month, date.day, 7, 0),
       );
 
       await _scheduleReminderIfFuture(
         id: 200 + dayOffset,
         title: 'Evening Azkar',
         body: 'Remember your evening adhkar.',
-        scheduledTime: DateTime(date.year, date.month, date.day, 18),
+        scheduledTime: DateTime(date.year, date.month, date.day, 18, 0),
       );
 
       final fastingReason = _fastingReminderReason(date);
@@ -620,6 +762,24 @@ class PrayerService extends ChangeNotifier {
         ),
       );
     }
+
+    await _logPendingReminderCount();
+  }
+
+  Future<void> _logPendingReminderCount() async {
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      final reminderCount = pending.where((notification) {
+        final id = notification.id;
+        return (id >= 100 && id < 100 + _androidDuaReminderScheduleDays) ||
+            (id >= 200 && id < 200 + _androidDuaReminderScheduleDays) ||
+            (id >= _fastingReminderBaseId &&
+                id < _fastingReminderBaseId + _androidDuaReminderScheduleDays);
+      }).length;
+      debugPrint('Scheduled azkar/fasting reminders: $reminderCount');
+    } catch (e) {
+      debugPrint('Unable to inspect scheduled reminders: $e');
+    }
   }
 
   Future<void> _scheduleReminderIfFuture({
@@ -628,18 +788,26 @@ class PrayerService extends ChangeNotifier {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    if (!scheduledTime.isAfter(DateTime.now())) return;
+    final now = DateTime.now();
+    if (!scheduledTime.isAfter(now)) return;
 
-    await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      _reminderNotificationDetails(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+    try {
+      final scheduledTz = tz.TZDateTime.from(scheduledTime, tz.local);
+      debugPrint('Scheduling reminder "$title" (id: $id) for $scheduledTz (Local: $scheduledTime)');
+
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledTz,
+        _reminderNotificationDetails(),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      debugPrint('Unable to schedule reminder "$title" at $scheduledTime: $e');
+    }
   }
 
   String? _fastingReminderReason(DateTime date) {
@@ -680,16 +848,18 @@ class PrayerService extends ChangeNotifier {
   }
 
   NotificationDetails _reminderNotificationDetails() {
-    const android = AndroidNotificationDetails(
-      'dua_reminders_channel',
+    final android = AndroidNotificationDetails(
+      'dua_reminders_channel_v4',
       'Dua Reminders',
       channelDescription: 'Reminders for morning and evening azkar',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       enableVibration: true,
+      category: AndroidNotificationCategory.reminder,
+      visibility: NotificationVisibility.public,
     );
     const ios = DarwinNotificationDetails();
-    return const NotificationDetails(android: android, iOS: ios);
+    return NotificationDetails(android: android, iOS: ios);
   }
 
   String getNextPrayerName() {
