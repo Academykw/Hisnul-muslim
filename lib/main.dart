@@ -26,6 +26,12 @@ Future<void> main() async {
     debugPrint("Settings init failed: $e");
   }
 
+  try {
+    await prayerService.restoreCachedLocation();
+  } catch (e) {
+    debugPrint("Cached prayer location restore failed: $e");
+  }
+
   // Run app immediately to avoid black screen
   runApp(
     MultiProvider(
