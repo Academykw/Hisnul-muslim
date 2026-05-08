@@ -440,7 +440,9 @@ class _HomeBottomPanelState extends State<_HomeBottomPanel>
                             theme.colorScheme.surfaceContainerHighest,
                         onChanged: (value) async {
                           await settings.setDailyRemindersEnabled(value);
-                          await prayerService.refreshDuaReminders();
+                          await prayerService.refreshDuaReminders(
+                            requestNotificationPermission: value,
+                          );
                         },
                       ),
                     ],
