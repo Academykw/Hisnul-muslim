@@ -137,9 +137,11 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
                 ),
           leading: Padding(
             padding: const EdgeInsets.only(left: 12),
+
             child: ClipOval(
               child: Image.asset(
                 'assets/img/app_icon.png',
+               
                 fit: BoxFit.cover,
               ),
             ),
