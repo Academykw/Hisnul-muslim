@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -16,6 +18,22 @@ import android.os.IBinder
 class AdhanPlaybackService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var currentNotificationId = NOTIFICATION_ID
+    
+    // Screen transition tracking for power button stop
+    private var lastTransitionTime: Long = 0
+    private var isReceiverRegistered = false
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_SCREEN_OFF || intent.action == Intent.ACTION_SCREEN_ON) {
+                val now = System.currentTimeMillis()
+                // If two screen state changes happen within 1 second, stop the Adhan
+                if (lastTransitionTime > 0 && (now - lastTransitionTime) < 1000) {
+                    stopPlayback()
+                }
+                lastTransitionTime = now
+            }
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -32,6 +50,7 @@ class AdhanPlaybackService : Service() {
                 currentNotificationId = NOTIFICATION_ID + prayerId
                 startForeground(currentNotificationId, buildNotification(prayerName))
                 playAdhan()
+                registerScreenReceiver()
                 return START_NOT_STICKY
             }
         }
@@ -41,8 +60,34 @@ class AdhanPlaybackService : Service() {
     }
 
     override fun onDestroy() {
+        unregisterScreenReceiver()
         stopPlayerOnly()
         super.onDestroy()
+    }
+
+    private fun registerScreenReceiver() {
+        if (!isReceiverRegistered) {
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+            }
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(screenReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(screenReceiver, filter)
+            }
+
+            isReceiverRegistered = true
+            lastTransitionTime = System.currentTimeMillis() // Set initial time to ignore wake events
+        }
+    }
+
+    private fun unregisterScreenReceiver() {
+        if (isReceiverRegistered) {
+            unregisterReceiver(screenReceiver)
+            isReceiverRegistered = false
+        }
     }
 
     private fun playAdhan() {
