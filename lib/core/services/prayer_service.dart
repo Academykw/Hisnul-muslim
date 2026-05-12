@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -118,7 +117,7 @@ class PrayerService extends ChangeNotifier {
   Future<void> _refreshLocalTimezone() async {
     try {
       final res = await FlutterTimezone.getLocalTimezone();
-      // res is TimezoneInfo object from flutter_timezone 5.0.2
+      // In flutter_timezone 5.0.2, getLocalTimezone() returns a TimezoneInfo object
       final String timeZoneName = res.identifier;
       tz.setLocalLocation(tz.getLocation(timeZoneName));
       debugPrint('Local timezone set to: $timeZoneName');
@@ -176,12 +175,6 @@ class PrayerService extends ChangeNotifier {
     return enabled ?? false;
   }
 
-  bool _shouldAutoRefreshLocation() {
-    // Check if location should be auto-refreshed (once per 24 hours)
-    // Return false if it was refreshed less than 24 hours ago
-    return true; // Will be checked in init method
-  }
-
   Future<bool> _canAutoRefreshLocation() async {
     final prefs = await SharedPreferences.getInstance();
     final lastRefreshMs = prefs.getInt(_lastLocationRefreshKey);
@@ -200,6 +193,27 @@ class PrayerService extends ChangeNotifier {
   Future<void> _saveLocationRefreshTime() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_lastLocationRefreshKey, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<void> scheduleTestNotification() async {
+    if (!_notificationsReady) return;
+    
+    final now = DateTime.now();
+    final testTime = now.add(const Duration(seconds: 10));
+    
+    debugPrint('Scheduling TEST notification for $testTime');
+    
+    // We use a simple schedule for testing
+    await _notifications.zonedSchedule(
+      9999,
+      'Test Notification',
+      'This is a test notification from Deen Azkar.',
+      tz.TZDateTime.from(testTime, tz.local),
+      _reminderNotificationDetails(),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   Future<void> _requestBatteryOptimizationExemption() async {
@@ -731,19 +745,37 @@ class PrayerService extends ChangeNotifier {
 
     for (var dayOffset = 0; dayOffset < scheduleDays; dayOffset++) {
       final date = today.add(Duration(days: dayOffset));
+      final dayPrayers = _prayersFor(date);
+
+      DateTime morningTime;
+      DateTime eveningTime;
+
+      if (dayPrayers.isNotEmpty) {
+        // Morning Azkar: 20 minutes after Fajr
+        final fajr = dayPrayers.firstWhere((p) => p.id == 0).time;
+        morningTime = fajr.add(const Duration(minutes: 20));
+
+        // Evening Azkar: 1 hour 30 minutes after Asr
+        final asr = dayPrayers.firstWhere((p) => p.id == 2).time;
+        eveningTime = asr.add(const Duration(hours: 1, minutes: 30));
+      } else {
+        // Fallback to fixed times if location is not available
+        morningTime = DateTime(date.year, date.month, date.day, 7, 0);
+        eveningTime = DateTime(date.year, date.month, date.day, 18, 0);
+      }
 
       await _scheduleReminderIfFuture(
         id: 100 + dayOffset,
         title: 'Morning Azkar',
         body: 'Start your day with morning adhkar.',
-        scheduledTime: DateTime(date.year, date.month, date.day, 7, 0),
+        scheduledTime: morningTime,
       );
 
       await _scheduleReminderIfFuture(
         id: 200 + dayOffset,
         title: 'Evening Azkar',
         body: 'Remember your evening adhkar.',
-        scheduledTime: DateTime(date.year, date.month, date.day, 18, 0),
+        scheduledTime: eveningTime,
       );
 
       final fastingReason = _fastingReminderReason(date);
@@ -848,7 +880,7 @@ class PrayerService extends ChangeNotifier {
   }
 
   NotificationDetails _reminderNotificationDetails() {
-    final android = AndroidNotificationDetails(
+    const android = AndroidNotificationDetails(
       'dua_reminders_channel_v4',
       'Dua Reminders',
       channelDescription: 'Reminders for morning and evening azkar',
@@ -859,7 +891,7 @@ class PrayerService extends ChangeNotifier {
       visibility: NotificationVisibility.public,
     );
     const ios = DarwinNotificationDetails();
-    return NotificationDetails(android: android, iOS: ios);
+    return const NotificationDetails(android: android, iOS: ios);
   }
 
   String getNextPrayerName() {
