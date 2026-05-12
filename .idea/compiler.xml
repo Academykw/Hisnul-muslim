@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="android.just_audio" target="21" />
       <module name="android.share_plus" target="21" />
     </bytecodeTargetLevel>
   </component>
