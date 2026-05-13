@@ -8,11 +8,14 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('About'),
-        backgroundColor: AppTheme.primaryRed,
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? null : AppTheme.primaryRed,
+        foregroundColor: isDark ? null : Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.share_rounded),
@@ -33,11 +36,11 @@ class AboutScreen extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                     blurRadius: 10,
                   ),
                 ],
@@ -50,21 +53,28 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Deen Azkar',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
-            const Text(
+            Text(
               'Fortress of the Muslim',
-              style: TextStyle(fontSize: 14, color: AppTheme.subTextColor),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'حِصْنُ الْمُسْلِم',
               style: TextStyle(
                 fontFamily: 'Uthmanic',
                 fontSize: 22,
-                color: AppTheme.primaryRed,
+                color: isDark ? theme.colorScheme.primary : AppTheme.primaryRed,
               ),
               textDirection: TextDirection.rtl,
             ),
@@ -105,18 +115,18 @@ class AboutScreen extends StatelessWidget {
               icon: const Icon(Icons.share_rounded),
               label: const Text('Share This App'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryRed,
-                foregroundColor: Colors.white,
+                backgroundColor: isDark ? theme.colorScheme.primary : AppTheme.primaryRed,
+                foregroundColor: isDark ? theme.colorScheme.onPrimary : Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'May Allah accept this work from us.\nآمين',
               style: TextStyle(
                 fontSize: 15,
                 fontStyle: FontStyle.italic,
-                color: AppTheme.subTextColor,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -135,20 +145,32 @@ class _AboutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: AppTheme.primaryRed)),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: isDark ? theme.colorScheme.primary : AppTheme.primaryRed,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(content,
-                style: const TextStyle(fontSize: 14, height: 1.6, color: Colors.black87)),
+            Text(
+              content,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
           ],
         ),
       ),
