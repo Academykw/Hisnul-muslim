@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
 import '../dua_detail/dua_detail_screen.dart';
@@ -67,15 +69,22 @@ class _FilteredDuaListScreenState extends State<FilteredDuaListScreen> {
                           final dua = _duas[index];
                           return _DuaListItem(
                             dua: dua,
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => DuaDetailScreen(
-                                  duaId: dua.reference,
-                                  duaTitle: dua.title ?? '',
-                                ),
-                              ),
-                            ),
+                            onTap: () {
+                              context.read<AdService>().showInterstitialAd(
+                                onAdDismissed: () {
+                                  if (!mounted) return;
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => DuaDetailScreen(
+                                        duaId: dua.reference,
+                                        duaTitle: dua.title ?? '',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                             onFavToggle: (newFav) async {
                               await DatabaseHelper.instance.setGroupFavStatus(dua.reference, newFav);
                               setState(() => _duas[index] = dua.copyWith(isFav: newFav));

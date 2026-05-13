@@ -6,6 +6,7 @@ import '../../core/services/settings_service.dart';
 import '../../core/services/prayer_service.dart';
 import '../../core/services/firebase_service.dart';
 import '../../core/services/share_service.dart';
+import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/daily_inspiration_card.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
@@ -63,12 +64,18 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
   }
 
   void _openDetail(Dua dua) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DuaDetailScreen(duaId: dua.reference, duaTitle: dua.title ?? ''),
-      ),
-    );
+    context.read<AdService>().showInterstitialAd(
+          onAdDismissed: () {
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DuaDetailScreen(
+                    duaId: dua.reference, duaTitle: dua.title ?? ''),
+              ),
+            );
+          },
+        );
   }
 
   Future<bool> _onWillPop() async {
@@ -204,22 +211,54 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
           ),
         ),
         bottomNavigationBar: _HomeBottomPanel(
-          onPrayer: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PrayerTimesScreen()),
-          ),
-          onZakat: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
-          ),
-          onHijri: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
-          ),
-          onSettings: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SettingsScreen()),
-          ),
+          onPrayer: () {
+            context.read<AdService>().showInterstitialAd(
+                  onAdDismissed: () {
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const PrayerTimesScreen()),
+                    );
+                  },
+                );
+          },
+          onZakat: () {
+            context.read<AdService>().showInterstitialAd(
+                  onAdDismissed: () {
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const ZakatCalculatorScreen()),
+                    );
+                  },
+                );
+          },
+          onHijri: () {
+            context.read<AdService>().showInterstitialAd(
+                  onAdDismissed: () {
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const HijriCalendarScreen()),
+                    );
+                  },
+                );
+          },
+          onSettings: () {
+            context.read<AdService>().showInterstitialAd(
+                  onAdDismissed: () {
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SettingsScreen()),
+                    );
+                  },
+                );
+          },
         ),
       ),
     );
