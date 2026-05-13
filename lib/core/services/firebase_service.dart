@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import '../models/daily_inspiration.dart';
+import '../constants/app_constants.dart';
 
 class FirebaseService extends ChangeNotifier {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -11,11 +13,15 @@ class FirebaseService extends ChangeNotifier {
   FirebaseService._internal();
 
   FirebaseFirestore? _db;
+  FirebaseDatabase? _rtdb;
   FirebaseRemoteConfig? _remoteConfig;
   bool _isInitialized = false;
 
   DailyInspiration? _dailyInspiration;
   DailyInspiration? get dailyInspiration => _dailyInspiration;
+
+  Map<String, double> _nisabValues = {};
+  Map<String, double> get nisabValues => _nisabValues;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -23,8 +29,8 @@ class FirebaseService extends ChangeNotifier {
   /// Default placeholder to show when network is unavailable or fetch fails
   DailyInspiration get _placeholder => DailyInspiration(
         id: 'placeholder',
-        content: "Indeed, with hardship [will be] ease.",
-        source: "Quran 94:6",
+        content: AppConstants.fallbackInspirationContent,
+        source: AppConstants.fallbackInspirationSource,
         type: "Aya",
         date: DateTime.now(),
       );
@@ -32,22 +38,66 @@ class FirebaseService extends ChangeNotifier {
   Future<void> init() async {
     if (_isInitialized) return;
 
-    await Firebase.initializeApp().timeout(const Duration(seconds: 10));
-    _db = FirebaseFirestore.instance;
-    _remoteConfig = FirebaseRemoteConfig.instance;
+    try {
+      debugPrint("FirebaseService: Starting initialization...");
+      await Firebase.initializeApp().timeout(const Duration(seconds: 15));
+      debugPrint("FirebaseService: App initialized");
 
-    await _remoteConfig?.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(minutes: 1),
-      minimumFetchInterval: const Duration(hours: 1),
-    ));
+      _db = FirebaseFirestore.instance;
+      _rtdb = FirebaseDatabase.instance;
+      _remoteConfig = FirebaseRemoteConfig.instance;
 
-    await _remoteConfig?.fetchAndActivate();
+      await _remoteConfig?.setConfigSettings(RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 30),
+        minimumFetchInterval: const Duration(hours: 1),
+      ));
 
-    _isInitialized = true;
+      debugPrint("FirebaseService: Fetching Remote Config...");
+      await _remoteConfig?.fetchAndActivate().timeout(const Duration(seconds: 10), onTimeout: () {
+        debugPrint("FirebaseService: Remote Config fetch timed out");
+        return false;
+      });
+
+      _isInitialized = true;
+      debugPrint("FirebaseService: Initialization complete");
+      
+      // Pre-fetch nisab values (don't let this block the main init success)
+      fetchNisabValues();
+    } catch (e) {
+      debugPrint("FirebaseService: Initialization failed: $e");
+    }
   }
 
   String getBannerAdUnitId() {
     return _remoteConfig?.getString('ad_banner_unit_id') ?? '';
+  }
+
+  String getInterstitialAdUnitId() {
+    return _remoteConfig?.getString('ad_interstitial_unit_id') ?? '';
+  }
+
+  Future<void> fetchNisabValues() async {
+    if (!_isInitialized || _rtdb == null) return;
+    try {
+      debugPrint("FirebaseService: Fetching nisab values...");
+      final snapshot = await _rtdb!.ref('nisab').get().timeout(const Duration(seconds: 10));
+      if (snapshot.exists) {
+        final data = snapshot.value;
+        if (data is Map) {
+          _nisabValues = data.map((key, value) {
+            return MapEntry(key.toString(), (value as num).toDouble());
+          });
+          debugPrint("FirebaseService: Nisab values fetched successfully");
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint("FirebaseService: Error fetching nisab values: $e");
+    }
+  }
+
+  double getNisabForCurrency(String currency) {
+    return _nisabValues[currency] ?? 595.0; // Default fallback
   }
 
   Future<void> fetchDailyInspiration() async {

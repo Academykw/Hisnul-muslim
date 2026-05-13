@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/services/ad_service.dart';
+import '../../core/services/firebase_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
+import '../../core/constants/app_constants.dart';
 
 class ZakatCalculatorScreen extends StatefulWidget {
   const ZakatCalculatorScreen({super.key});
@@ -12,7 +16,7 @@ class ZakatCalculatorScreen extends StatefulWidget {
 class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   final _assetsCtrl = TextEditingController();
   final _liabilitiesCtrl = TextEditingController();
-  final _nisabCtrl = TextEditingController(text: '595');
+  final _nisabCtrl = TextEditingController();
 
   String _currency = 'USD';
   String? _resultText;
@@ -20,11 +24,35 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   String? _nisabStatus;
   bool _aboveNisab = false;
 
-  final List<String> _currencies = ['USD', 'GBP', 'EUR', 'SAR', 'AED', 'MYR', 'NGN'];
+  final List<String> _currencies = AppConstants.zakatCurrencies;
 
-  static const double _zakatRate = 0.025;
+  static const double _zakatRate = AppConstants.zakatRate;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateNisabFromFirebase();
+    });
+  }
+
+  void _updateNisabFromFirebase() {
+    final firebase = context.read<FirebaseService>();
+    final nisab = firebase.getNisabForCurrency(_currency);
+    _nisabCtrl.text = nisab.toStringAsFixed(0);
+  }
 
   void _calculate() {
+    final adService = context.read<AdService>();
+    adService.showInterstitialAd(
+      onAdDismissed: () {
+        if (!mounted) return;
+        _performCalculation();
+      },
+    );
+  }
+
+  void _performCalculation() {
     final assets = double.tryParse(_assetsCtrl.text.replaceAll(',', '')) ?? 0;
     final liabilities = double.tryParse(_liabilitiesCtrl.text.replaceAll(',', '')) ?? 0;
     final nisab = double.tryParse(_nisabCtrl.text.replaceAll(',', '')) ?? 0;
@@ -63,11 +91,23 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch firebase service so we get updates when nisab values are fetched
+    final firebase = context.watch<FirebaseService>();
+
+    // Auto-fill nisab if it's currently empty or has the default 0, and we have data from Firebase
+    if (_nisabCtrl.text.isEmpty || _nisabCtrl.text == '595') {
+      final val = firebase.getNisabForCurrency(_currency);
+      // Only update if we actually got a value from Firebase (not the default 595 if we're not sure)
+      if (firebase.nisabValues.containsKey(_currency)) {
+         _nisabCtrl.text = val.toStringAsFixed(0);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Zakat Calculator'),
-        backgroundColor: AppTheme.primaryRed,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? null : AppTheme.primaryRed,
+        foregroundColor: Theme.of(context).brightness == Brightness.dark ? null : Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -90,7 +130,14 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                   items: _currencies
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
-                  onChanged: (v) => setState(() => _currency = v!),
+                  onChanged: (v) {
+                    if (v != null) {
+                      setState(() {
+                        _currency = v;
+                        _updateNisabFromFirebase();
+                      });
+                    }
+                  },
                 ),
               ),
             ),
@@ -110,9 +157,12 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             _buildField(_nisabCtrl, 'Nisab Value ($_currency)',
                 'Enter nisab threshold', Icons.balance_rounded),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Nisab is approximately 595g of silver or 85g of gold equivalent in your local currency.',
-              style: TextStyle(fontSize: 12, color: AppTheme.subTextColor),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 20),
 
@@ -127,8 +177,12 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             if (_nisabStatus != null)
               _ResultCard(
                 color: _aboveNisab
-                    ? Colors.green.shade50
-                    : Colors.orange.shade50,
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.green.withOpacity(0.15)
+                        : Colors.green.shade50)
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.orange.withOpacity(0.15)
+                        : Colors.orange.shade50),
                 borderColor: _aboveNisab ? Colors.green : Colors.orange,
                 icon: _aboveNisab
                     ? Icons.check_circle_rounded
@@ -140,10 +194,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             if (_resultText != null) ...[
               const SizedBox(height: 12),
               _ResultCard(
-                color: AppTheme.primaryRed.withOpacity(0.07),
-                borderColor: AppTheme.primaryRed,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderColor: Theme.of(context).colorScheme.primary,
                 icon: Icons.calculate_rounded,
-                iconColor: AppTheme.primaryRed,
+                iconColor: Theme.of(context).colorScheme.primary,
                 text: _resultText!,
                 isLarge: true,
               ),
@@ -161,8 +215,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                       const SizedBox(height: 8),
                       Text(_breakdownText!,
-                          style: const TextStyle(
-                              fontSize: 14, height: 1.6, color: Colors.black87)),
+                          style: TextStyle(
+                              fontSize: 14,
+                              height: 1.6,
+                              color: Theme.of(context).colorScheme.onSurface)),
                     ],
                   ),
                 ),
@@ -170,9 +226,12 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
             ],
 
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Note: This calculator provides an estimate. Please consult a qualified Islamic scholar for precise Zakat calculation.',
-              style: TextStyle(fontSize: 12, color: AppTheme.subTextColor),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -183,6 +242,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
 
   Widget _buildField(
       TextEditingController ctrl, String label, String hint, IconData icon) {
+    final theme = Theme.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -192,7 +252,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
           decoration: InputDecoration(
             labelText: label,
             hintText: hint,
-            prefixIcon: Icon(icon, color: AppTheme.primaryRed),
+            prefixIcon: Icon(icon, color: theme.colorScheme.primary),
             border: InputBorder.none,
           ),
         ),
@@ -220,6 +280,7 @@ class _ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -237,7 +298,7 @@ class _ResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isLarge ? 16 : 14,
                 fontWeight: isLarge ? FontWeight.bold : FontWeight.normal,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

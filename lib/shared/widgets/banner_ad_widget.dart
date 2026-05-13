@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/firebase_service.dart';
+import '../../core/constants/ad_config.dart';
 
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key});
@@ -15,12 +16,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
-  /// SET THIS TO FALSE FOR PRODUCTION
-  static const bool _useTestAds = true;
-
-  /// Official Google Test Banner Unit ID for Android
-  static const String _androidTestUnitId = 'ca-app-pub-3940256099942544/6300978111';
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -32,10 +27,14 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     
     // Determine which ID to use
     String adUnitId;
-    if (_useTestAds || kDebugMode) {
-      adUnitId = _androidTestUnitId;
+    if (AdConfig.useTestAds) {
+      adUnitId = AdConfig.bannerAdUnitId;
     } else {
+      // Try Firebase Remote Config first, fallback to AdConfig local ID
       adUnitId = firebaseService.getBannerAdUnitId();
+      if (adUnitId.isEmpty) {
+        adUnitId = AdConfig.bannerAdUnitId;
+      }
     }
 
     if (adUnitId.isEmpty) {

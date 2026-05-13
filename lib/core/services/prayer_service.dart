@@ -12,6 +12,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+import '../constants/app_constants.dart';
 
 @pragma('vm:entry-point')
 void prayerNotificationTapBackground(NotificationResponse response) {
@@ -32,7 +33,7 @@ class PrayerService extends ChangeNotifier {
   static const String stopAdhanActionId = 'stop_adhan';
   static const String stopAdhanPayload = 'stop_adhan';
   static const MethodChannel _adhanAlarmChannel =
-      MethodChannel('com.deen.adkhar/adhan_alarm');
+      MethodChannel(AppConstants.adhanAlarmChannel);
   static const String _lastLocationLatKey = 'last_lat';
   static const String _lastLocationLonKey = 'last_lon';
   static const String _lastLocationAddressKey = 'last_address';
