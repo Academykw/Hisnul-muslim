@@ -21,16 +21,27 @@ class AdhanPlaybackService : Service() {
     
     // Screen transition tracking for power button stop
     private var lastTransitionTime: Long = 0
+    private var transitionCount = 0
     private var isReceiverRegistered = false
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_SCREEN_OFF || intent.action == Intent.ACTION_SCREEN_ON) {
                 val now = System.currentTimeMillis()
-                // If two screen state changes happen within 1 second, stop the Adhan
-                if (lastTransitionTime > 0 && (now - lastTransitionTime) < 1000) {
+                
+                // If transitions happen within 2 seconds of each other
+                if (now - lastTransitionTime < 2000) {
+                    transitionCount++
+                } else {
+                    transitionCount = 1
+                }
+                
+                lastTransitionTime = now
+
+                // If we detect 2 transitions (e.g. OFF -> ON -> OFF or ON -> OFF -> ON)
+                // within the time window, stop the Adhan.
+                if (transitionCount >= 2) {
                     stopPlayback()
                 }
-                lastTransitionTime = now
             }
         }
     }
@@ -48,7 +59,10 @@ class AdhanPlaybackService : Service() {
                     ?: "Prayer"
                 val prayerId = intent.getIntExtra(AdhanAlarmScheduler.EXTRA_ID, 0)
                 currentNotificationId = NOTIFICATION_ID + prayerId
-                startForeground(currentNotificationId, buildNotification(prayerName))
+                
+                // Start as foreground service immediately
+                startForegroundCompat(currentNotificationId, buildNotification(prayerName))
+                
                 playAdhan()
                 registerScreenReceiver()
                 return START_NOT_STICKY
@@ -70,22 +84,28 @@ class AdhanPlaybackService : Service() {
             val filter = IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
+                priority = 999 // Try to get the broadcast early
             }
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(screenReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+                // Use RECEIVER_EXPORTED for system broadcasts on API 33+
+                // This ensures we receive SCREEN_ON/OFF from the system
+                registerReceiver(screenReceiver, filter, Context.RECEIVER_EXPORTED)
             } else {
                 registerReceiver(screenReceiver, filter)
             }
 
             isReceiverRegistered = true
-            lastTransitionTime = System.currentTimeMillis() // Set initial time to ignore wake events
+            lastTransitionTime = System.currentTimeMillis()
+            transitionCount = 0
         }
     }
 
     private fun unregisterScreenReceiver() {
         if (isReceiverRegistered) {
-            unregisterReceiver(screenReceiver)
+            try {
+                unregisterReceiver(screenReceiver)
+            } catch (_: Exception) {}
             isReceiverRegistered = false
         }
     }
@@ -166,11 +186,24 @@ class AdhanPlaybackService : Service() {
             .setContentText("Adhan is playing for $prayerName")
             .setPriority(Notification.PRIORITY_MAX)
             .setCategory(Notification.CATEGORY_ALARM)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setAutoCancel(false)
             .setContentIntent(launchPendingIntent)
             .addAction(android.R.drawable.ic_media_pause, "Stop", stopPendingIntent)
             .build()
+    }
+
+    private fun startForegroundCompat(notificationId: Int, notification: Notification) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                notificationId, 
+                notification, 
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
+        } else {
+            startForeground(notificationId, notification)
+        }
     }
 
     private fun ensureNotificationChannel() {
