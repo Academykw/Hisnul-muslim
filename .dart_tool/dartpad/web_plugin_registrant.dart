@@ -10,6 +10,7 @@ import 'package:audio_session/audio_session_web.dart';
 import 'package:cloud_firestore_web/cloud_firestore_web.dart';
 import 'package:connectivity_plus/src/connectivity_plus_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
+import 'package:firebase_database_web/firebase_database_web.dart';
 import 'package:firebase_remote_config_web/firebase_remote_config_web.dart';
 import 'package:flutter_timezone/flutter_timezone_web.dart';
 import 'package:geolocator_web/geolocator_web.dart';
@@ -25,6 +26,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebaseFirestoreWeb.registerWith(registrar);
   ConnectivityPlusWebPlugin.registerWith(registrar);
   FirebaseCoreWeb.registerWith(registrar);
+  FirebaseDatabaseWeb.registerWith(registrar);
   FirebaseRemoteConfigWeb.registerWith(registrar);
   FlutterTimezonePlugin.registerWith(registrar);
   GeolocatorPlugin.registerWith(registrar);

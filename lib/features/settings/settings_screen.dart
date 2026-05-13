@@ -147,25 +147,25 @@ class SettingsScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const AboutScreen()),
                   ),
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.notifications_paused_rounded,
-                    color: theme.colorScheme.primary,
-                  ),
-                  title: const Text('Test Notification'),
-                  subtitle: const Text('Schedule a test alert for 10 seconds from now'),
-                  onTap: () async {
-                    await context.read<PrayerService>().scheduleTestNotification();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Test notification scheduled for 10s from now'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
-                ),
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.notifications_paused_rounded,
+                //     color: theme.colorScheme.primary,
+                //   ),
+                //   title: const Text('Test Notification'),
+                //   subtitle: const Text('Schedule a test alert for 10 seconds from now'),
+                //   onTap: () async {
+                //     await context.read<PrayerService>().scheduleTestNotification();
+                //     if (context.mounted) {
+                //       ScaffoldMessenger.of(context).showSnackBar(
+                //         const SnackBar(
+                //           content: Text('Test notification scheduled for 10s from now'),
+                //           duration: Duration(seconds: 2),
+                //         ),
+                //       );
+                //     }
+                //   },
+                // ),
                 const SizedBox(height: 32),
                 ],
               ),

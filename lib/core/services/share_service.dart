@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import '../constants/app_constants.dart';
 
 class ShareService {
   /// Shared text across the app using share_plus.
@@ -47,9 +48,11 @@ class ShareService {
 
   /// Shares the app link
   static Future<void> shareApp(BuildContext context) async {
-    const appText = 'Download Hisnul Muslim app for daily duas and adhkar:\n'
-        'https://play.google.com/store/apps/details?id=com.deen.adkhar';
-    await shareText(context, text: appText, subject: 'Hisnul Muslim App');
+    await shareText(
+      context,
+      text: AppConstants.shareAppMessage,
+      subject: '${AppConstants.appName} App',
+    );
   }
 
   /// Shares files (like images)
