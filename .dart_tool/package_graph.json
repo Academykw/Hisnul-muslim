@@ -13,6 +13,7 @@
         "connectivity_plus",
         "cupertino_icons",
         "firebase_core",
+        "firebase_database",
         "firebase_remote_config",
         "flutter",
         "flutter_local_notifications",
@@ -262,6 +263,17 @@
         "webview_flutter",
         "webview_flutter_android",
         "webview_flutter_wkwebview"
+      ]
+    },
+    {
+      "name": "firebase_database",
+      "version": "11.3.10",
+      "dependencies": [
+        "firebase_core",
+        "firebase_core_platform_interface",
+        "firebase_database_platform_interface",
+        "firebase_database_web",
+        "flutter"
       ]
     },
     {
@@ -840,6 +852,41 @@
       ]
     },
     {
+      "name": "firebase_database_web",
+      "version": "0.2.6+16",
+      "dependencies": [
+        "collection",
+        "firebase_core",
+        "firebase_core_web",
+        "firebase_database_platform_interface",
+        "flutter",
+        "flutter_web_plugins"
+      ]
+    },
+    {
+      "name": "firebase_database_platform_interface",
+      "version": "0.2.6+10",
+      "dependencies": [
+        "_flutterfire_internals",
+        "collection",
+        "firebase_core",
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "firebase_core_platform_interface",
+      "version": "6.0.3",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_test",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
       "name": "firebase_remote_config_web",
       "version": "1.8.9",
       "dependencies": [
@@ -858,17 +905,6 @@
         "_flutterfire_internals",
         "firebase_core",
         "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "firebase_core_platform_interface",
-      "version": "6.0.3",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_test",
         "meta",
         "plugin_platform_interface"
       ]
