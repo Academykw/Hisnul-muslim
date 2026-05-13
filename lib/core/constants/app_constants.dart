@@ -12,7 +12,7 @@ class AppConstants {
   static const String shareAppMessage = 'Download $appName app for daily duas and adhkar:\n$playStoreUrl';
 
   // Zakat Configuration
-  static const List<String> zakatCurrencies = ['USD', 'GBP', 'EUR', 'SAR', 'AED', 'MYR', 'NGN'];
+  static const List<String> zakatCurrencies = ['USD', 'GBP', 'EUR', 'SAR', 'AED', 'MYR', 'NGN', 'AUD', 'CAD'];
   static const double zakatRate = 0.025;
 
   // Firebase Fallbacks

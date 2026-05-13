@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
 import '../dua_detail/dua_detail_screen.dart';
@@ -102,16 +104,23 @@ class _BookmarksGroupScreenState extends State<BookmarksGroupScreen> {
                                 title: Text(g.title ?? ''),
                                 trailing: const Icon(Icons.star_rounded,
                                     color: AppTheme.accentGold),
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DuaDetailScreen(
-                                      duaId: g.reference,
-                                      duaTitle: g.title ?? '',
-                                      favoritesOnly: true,
-                                    ),
-                                  ),
-                                ),
+                                onTap: () {
+                                  context.read<AdService>().showInterstitialAd(
+                                    onAdDismissed: () {
+                                      if (!mounted) return;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DuaDetailScreen(
+                                            duaId: g.reference,
+                                            duaTitle: g.title ?? '',
+                                            favoritesOnly: true,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               ),
                             );
                           },

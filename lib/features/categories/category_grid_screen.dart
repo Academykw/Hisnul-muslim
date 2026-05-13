@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../dua_group/filtered_dua_list_screen.dart';
 
@@ -151,15 +153,21 @@ class _CategoryCardState extends State<_CategoryCard>
   void _onTapUp(TapUpDetails _) async {
     await _ctrl.forward();
     if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FilteredDuaListScreen(
-          filterIds: widget.category.filterIds,
-          categoryTitle: widget.category.name,
-        ),
-      ),
-    );
+
+    context.read<AdService>().showInterstitialAd(
+          onAdDismissed: () {
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FilteredDuaListScreen(
+                  filterIds: widget.category.filterIds,
+                  categoryTitle: widget.category.name,
+                ),
+              ),
+            );
+          },
+        );
   }
 
   void _onTapCancel() => _ctrl.forward();
