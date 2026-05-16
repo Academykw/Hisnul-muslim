@@ -18,11 +18,21 @@ class BookmarksGroupScreen extends StatefulWidget {
 class _BookmarksGroupScreenState extends State<BookmarksGroupScreen> {
   List<Dua> _groups = [];
   bool _loading = true;
+  String? _lastLoadedLocale;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.watch<SettingsService>().localeCode;
+    if (_lastLoadedLocale != locale) {
+      _lastLoadedLocale = locale;
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
