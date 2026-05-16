@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/services/prayer_service.dart';
 import '../../core/services/share_service.dart';
 import '../../core/services/settings_service.dart';
@@ -14,10 +15,11 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsService>();
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
       ),
       body: Column(
         children: [
@@ -28,11 +30,20 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 // Theme Section
                 _SectionHeader(label: 'Display'),
-          ListTile(
-            leading: Icon(
-              Icons.dark_mode_rounded,
-              color: theme.colorScheme.primary,
-            ),
+                ListTile(
+                  leading: Icon(
+                    Icons.language_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('App Language'),
+                  subtitle: Text(_localeLabel(settings.localeCode)),
+                  onTap: () => _pickLanguage(context, settings),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.dark_mode_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
             title: const Text('Theme'),
             subtitle: Text(_themeLabel(settings.theme)),
             onTap: () => _pickTheme(context, settings),
@@ -188,6 +199,64 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  String _localeLabel(String code) {
+    switch (code) {
+      case 'en':
+        return 'English';
+      case 'ar':
+        return 'العربية (Arabic)';
+      case 'id':
+        return 'Bahasa Indonesia';
+      case 'ur':
+        return 'اردو (Urdu)';
+      default:
+        return 'System Default';
+    }
+  }
+
+  Future<void> _pickLanguage(
+    BuildContext context,
+    SettingsService settings,
+  ) async {
+    final selectedLocale = await showDialog<String>(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: const Text('Choose Language'),
+        children: [
+          _LocaleOption(
+            label: 'System Default',
+            value: 'system',
+            current: settings.localeCode,
+          ),
+          _LocaleOption(
+            label: 'English',
+            value: 'en',
+            current: settings.localeCode,
+          ),
+          _LocaleOption(
+            label: 'العربية (Arabic)',
+            value: 'ar',
+            current: settings.localeCode,
+          ),
+          _LocaleOption(
+            label: 'Bahasa Indonesia',
+            value: 'id',
+            current: settings.localeCode,
+          ),
+          _LocaleOption(
+            label: 'اردو (Urdu)',
+            value: 'ur',
+            current: settings.localeCode,
+          ),
+        ],
+      ),
+    );
+
+    if (selectedLocale != null) {
+      await settings.setLocale(selectedLocale);
+    }
+  }
+
   Future<void> _pickTheme(
     BuildContext context,
     SettingsService settings,
@@ -297,6 +366,37 @@ class _ThemeOption extends StatelessWidget {
   final String current;
 
   const _ThemeOption({
+    required this.label,
+    required this.value,
+    required this.current,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialogOption(
+      onPressed: () => Navigator.pop(context, value),
+      child: Row(
+        children: [
+          Icon(
+            current == value
+                ? Icons.radio_button_checked
+                : Icons.radio_button_off,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 12),
+          Text(label),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocaleOption extends StatelessWidget {
+  final String label;
+  final String value;
+  final String current;
+
+  const _LocaleOption({
     required this.label,
     required this.value,
     required this.current,

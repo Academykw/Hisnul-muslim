@@ -65,12 +65,12 @@ class AdService {
   }
 
   int _navigationCount = 0;
-  static const int adInterval = 5; // Show ad every 4th navigation
 
   void showInterstitialAd({VoidCallback? onAdDismissed, bool ignoreInterval = false}) {
     if (!ignoreInterval) {
       _navigationCount++;
-      if (_navigationCount % adInterval != 0) {
+      final interval = FirebaseService().getInterstitialAdInterval();
+      if (_navigationCount % interval != 0) {
         onAdDismissed?.call();
         return;
       }

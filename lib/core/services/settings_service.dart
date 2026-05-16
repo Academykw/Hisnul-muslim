@@ -8,17 +8,21 @@ class SettingsService extends ChangeNotifier {
   static const String _keyArabicFont = 'pref_font_arabic_typeface';
   static const String _keyOnboardingDone = 'pref_onboarding_done';
   static const String _keyDailyRemindersEnabled = 'pref_daily_reminders_enabled';
+  static const String _keyLocale = 'pref_key_locale';
 
   SharedPreferences? _prefs;
 
   String _theme = 'system';
-  double _arabicFontSize = 22.0;
-  double _otherFontSize = 14.0;
+  String _locale = 'en';
+  double _arabicFontSize = 26.0;
+  double _otherFontSize = 16.0;
   String _arabicFont = 'Uthmanic';
   bool _onboardingDone = false;
   bool _dailyRemindersEnabled = true;
 
   String get theme => _theme;
+  String get localeCode => _locale;
+  Locale? get locale => _locale == 'system' ? null : Locale(_locale);
   double get arabicFontSize => _arabicFontSize;
   double get otherFontSize => _otherFontSize;
   String get arabicFont => _arabicFont;
@@ -39,11 +43,12 @@ class SettingsService extends ChangeNotifier {
   Future<void> init() async {
     final prefs = await _ensurePrefs();
     _theme = prefs.getString(_keyTheme) ?? 'system';
-    _arabicFontSize = (prefs.getInt(_keyArabicFontSize) ?? 22).toDouble();
-    _otherFontSize = (prefs.getInt(_keyOtherFontSize) ?? 14).toDouble();
+    _arabicFontSize = (prefs.getInt(_keyArabicFontSize) ?? 26).toDouble();
+    _otherFontSize = (prefs.getInt(_keyOtherFontSize) ?? 16).toDouble();
     _arabicFont = prefs.getString(_keyArabicFont) ?? 'Uthmanic';
     _onboardingDone = prefs.getBool(_keyOnboardingDone) ?? false;
     _dailyRemindersEnabled = prefs.getBool(_keyDailyRemindersEnabled) ?? true;
+    _locale = prefs.getString(_keyLocale) ?? 'system';
   }
 
   Future<SharedPreferences> _ensurePrefs() async {
@@ -89,6 +94,13 @@ class SettingsService extends ChangeNotifier {
     final prefs = await _ensurePrefs();
     _dailyRemindersEnabled = value;
     await prefs.setBool(_keyDailyRemindersEnabled, value);
+    notifyListeners();
+  }
+
+  Future<void> setLocale(String value) async {
+    final prefs = await _ensurePrefs();
+    _locale = value;
+    await prefs.setString(_keyLocale, value);
     notifyListeners();
   }
 }
