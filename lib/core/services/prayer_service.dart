@@ -13,6 +13,8 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import '../constants/app_constants.dart';
+import 'widget_service.dart';
+import 'package:intl/intl.dart';
 
 @pragma('vm:entry-point')
 void prayerNotificationTapBackground(NotificationResponse response) {
@@ -54,6 +56,7 @@ class PrayerService extends ChangeNotifier {
   static const int _androidDuaReminderScheduleDays = 7;
   static const int _defaultDuaReminderScheduleDays = 7;
   static const int _fastingReminderBaseId = 3000;
+  static const int _kahfReminderBaseId = 4000;
 
   Position? _currentPosition;
   String _currentAddress = "Loading location...";
@@ -98,10 +101,15 @@ class PrayerService extends ChangeNotifier {
   Future<void> completeInitialPrayerSetup() async {
     await requestPermissions();
     
-    // Only auto-refresh location if it's the first time or 24+ hours have passed
+    // Attempt to get location but don't block the user forever
+    // 5 seconds is enough for a "snappy" feeling initial setup
     final canAutoRefresh = await _canAutoRefreshLocation();
     if (canAutoRefresh) {
-      await updateLocation();
+      try {
+        await updateLocation().timeout(const Duration(seconds: 7));
+      } catch (e) {
+        debugPrint("Initial location update timed out or failed: $e");
+      }
     }
     
     await refreshDeviceTimeSettings();
@@ -133,11 +141,23 @@ class PrayerService extends ChangeNotifier {
   Future<void> requestPermissions() async {
     await requestNotificationPermission();
 
-    // Also request exact alarm permission for Android 12+
-    await _notifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
+    if (_isAndroid) {
+      // Request exact alarm permission for Android 12+
+      await _notifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestExactAlarmsPermission();
+    }
+  }
 
+  /// Combined location request for startup
+  Future<void> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+    }
+  }
+
+  Future<void> requestBatteryExemption() async {
     await _requestBatteryOptimizationExemption();
   }
 
@@ -318,7 +338,21 @@ class PrayerService extends ChangeNotifier {
         : address;
 
     _calculatePrayers(scheduleNotifications: scheduleNotifications);
+    _updateHomeScreenWidget();
     return true;
+  }
+
+  Future<void> _updateHomeScreenWidget() async {
+    final nextTime = getNextPrayerTime();
+    if (nextTime != null) {
+      final name = getNextPrayerName();
+      final timeStr = DateFormat.jm().format(nextTime);
+      await WidgetService.updatePrayerWidget(
+        prayerName: name,
+        prayerTime: timeStr,
+        location: _currentAddress,
+      );
+    }
   }
 
   Future<void> updateLocation() async {
@@ -352,7 +386,10 @@ class PrayerService extends ChangeNotifier {
     }
 
     try {
-      _currentPosition = await Geolocator.getCurrentPosition();
+      // Use a timeout to prevent hanging if GPS is slow/unavailable
+      _currentPosition = await Geolocator.getCurrentPosition(
+        timeLimit: const Duration(seconds: 15),
+      );
 
       _currentAddress = _formatCoordinates(
         _currentPosition!.latitude,
@@ -362,8 +399,11 @@ class PrayerService extends ChangeNotifier {
       _calculatePrayers();
       notifyListeners();
 
-      await _getAddressFromLatLng();
-      await _saveCachedLocation();
+      // Get address in background, don't wait too long
+      _getAddressFromLatLng().timeout(const Duration(seconds: 10), onTimeout: () {
+        debugPrint("Location address resolution timed out");
+      });
+
     } catch (e) {
       debugPrint("Error updating location: $e");
     } finally {
@@ -379,12 +419,17 @@ class PrayerService extends ChangeNotifier {
         _currentPosition!.longitude,
       );
       Placemark place = placemarks[0];
+      
+      // Inclusion of more precise components like street name
       final parts = [
+        place.street,
+        place.subLocality,
         place.locality,
-        place.administrativeArea,
-        place.country,
-      ].where((part) => part != null && part.trim().isNotEmpty);
-      final resolvedAddress = parts.join(', ');
+      ].where((part) => part != null && part.trim().isNotEmpty).toList();
+
+      // If we have too many parts, take the most specific two (e.g., Street and Area)
+      final resolvedAddress = parts.take(2).join(', ');
+
       if (resolvedAddress.isNotEmpty) {
         _currentAddress = resolvedAddress;
       }
@@ -453,6 +498,7 @@ class PrayerService extends ChangeNotifier {
     if (scheduleNotifications) {
       _schedulePrayerNotifications();
     }
+    _updateHomeScreenWidget();
   }
 
   @pragma('vm:entry-point')
@@ -729,6 +775,7 @@ class PrayerService extends ChangeNotifier {
       await _notifications.cancel(100 + dayOffset);
       await _notifications.cancel(200 + dayOffset);
       await _notifications.cancel(_fastingReminderBaseId + dayOffset);
+      await _notifications.cancel(_kahfReminderBaseId + dayOffset);
     }
 
     if (!enabled) return;
@@ -754,7 +801,7 @@ class PrayerService extends ChangeNotifier {
       if (dayPrayers.isNotEmpty) {
         // Morning Azkar: 20 minutes after Fajr
         final fajr = dayPrayers.firstWhere((p) => p.id == 0).time;
-        morningTime = fajr.add(const Duration(minutes: 20));
+        morningTime = fajr.add(const Duration(minutes: 40));
 
         // Evening Azkar: 1 hour 30 minutes after Asr
         final asr = dayPrayers.firstWhere((p) => p.id == 2).time;
@@ -778,6 +825,24 @@ class PrayerService extends ChangeNotifier {
         body: 'Remember your evening adhkar.',
         scheduledTime: eveningTime,
       );
+
+      // Friday: Surah Al-Kahf Reminder (2 hours after Fajr)
+      if (date.weekday == DateTime.friday) {
+        DateTime kahfTime;
+        if (dayPrayers.isNotEmpty) {
+          final fajr = dayPrayers.firstWhere((p) => p.id == 0).time;
+          kahfTime = fajr.add(const Duration(hours: 2));
+        } else {
+          kahfTime = DateTime(date.year, date.month, date.day, 9, 0);
+        }
+
+        await _scheduleReminderIfFuture(
+          id: _kahfReminderBaseId + dayOffset,
+          title: 'Surah Al-Kahf',
+          body: 'It is Friday. Don\'t forget to recite Surah Al-Kahf.',
+          scheduledTime: kahfTime,
+        );
+      }
 
       final fastingReason = _fastingReminderReason(date);
       if (fastingReason == null) continue;
@@ -807,7 +872,9 @@ class PrayerService extends ChangeNotifier {
         return (id >= 100 && id < 100 + _androidDuaReminderScheduleDays) ||
             (id >= 200 && id < 200 + _androidDuaReminderScheduleDays) ||
             (id >= _fastingReminderBaseId &&
-                id < _fastingReminderBaseId + _androidDuaReminderScheduleDays);
+                id < _fastingReminderBaseId + _androidDuaReminderScheduleDays) ||
+            (id >= _kahfReminderBaseId &&
+                id < _kahfReminderBaseId + _androidDuaReminderScheduleDays);
       }).length;
       debugPrint('Scheduled azkar/fasting reminders: $reminderCount');
     } catch (e) {
@@ -852,10 +919,12 @@ class PrayerService extends ChangeNotifier {
             hijriDate.hDay >= 10 &&
             hijriDate.hDay <= 13);
 
-    if (!blocksVoluntaryFast &&
-        (date.weekday == DateTime.monday ||
-            date.weekday == DateTime.thursday)) {
-      reasons.add('the Sunnah Monday/Thursday fast');
+    if (!blocksVoluntaryFast) {
+      if (date.weekday == DateTime.monday) {
+        reasons.add('the Sunnah Monday fast');
+      } else if (date.weekday == DateTime.thursday) {
+        reasons.add('the Sunnah Thursday fast');
+      }
     }
 
     if (!blocksVoluntaryFast &&
