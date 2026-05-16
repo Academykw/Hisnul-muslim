@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
 import '../../core/services/settings_service.dart';
 import '../../core/services/prayer_service.dart';
 import '../../core/services/firebase_service.dart';
-import '../../core/services/share_service.dart';
 import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/daily_inspiration_card.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
-import '../about/about_screen.dart';
 import '../bookmarks/bookmarks_group_screen.dart';
 import '../dua_detail/dua_detail_screen.dart';
 import '../categories/category_grid_screen.dart';
@@ -18,6 +17,7 @@ import '../calendar/hijri_calendar_screen.dart';
 import '../prayer_times/prayer_times_screen.dart';
 import '../settings/settings_screen.dart';
 import '../zakat/zakat_calculator_screen.dart';
+import '../home/home_screen.dart';
 
 enum _ViewMode { grid, list }
 
@@ -37,16 +37,48 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
   bool _searchActive = false;
   final TextEditingController _searchController = TextEditingController();
   DateTime? _lastBackPress;
+  String? _lastLoadedLocale;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    
+    // Trigger permissions after the screen is fully rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestNeededPermissions();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.watch<SettingsService>().localeCode;
+    if (_lastLoadedLocale != locale) {
+      _lastLoadedLocale = locale;
+      _loadData();
+    }
+  }
+
+  Future<void> _requestNeededPermissions() async {
+    final prayerService = context.read<PrayerService>();
+    
+    // 1. First request Notifications (Crucial for Adhan/Reminders)
+    await prayerService.requestPermissions();
+    
+    // 2. Then request Location (Crucial for Prayer Times)
+    await prayerService.requestLocationPermission();
+    
+    // 3. Finally, trigger a location update if we don't have one yet
+    if (prayerService.currentPosition == null) {
+      await prayerService.updateLocation();
+    }
   }
 
   Future<void> _loadData() async {
+    final settings = context.read<SettingsService>();
     final rows = await DatabaseHelper.instance.getDuaGroups(
       searchFilter: _searchQuery.isEmpty ? null : _searchQuery,
+      locale: settings.localeCode,
     );
     if (!mounted) return;
     setState(() {
@@ -58,7 +90,11 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
 
   void _onSearch(String query) async {
     setState(() => _searchQuery = query);
-    final rows = await DatabaseHelper.instance.getDuaGroups(searchFilter: query);
+    final settings = context.read<SettingsService>();
+    final rows = await DatabaseHelper.instance.getDuaGroups(
+      searchFilter: query,
+      locale: settings.localeCode,
+    );
     if (!mounted) return;
     setState(() => _filtered = rows.map(Dua.fromGroupCursor).toList());
   }
@@ -114,9 +150,17 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final appBarTextColor = isDark ? theme.colorScheme.onSurface : Colors.white;
     final firebaseService = context.watch<FirebaseService>();
+    final l10n = AppLocalizations.of(context)!;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: isDark ? theme.appBarTheme.backgroundColor : AppTheme.primaryRed,
@@ -135,24 +179,13 @@ class _DuaGroupScreenState extends State<DuaGroupScreen> {
                   onChanged: _onSearch,
                 )
               : Text(
-                  'Deen Azkar',
+                  l10n.appTitle,
                   style: TextStyle(
                     color: appBarTextColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
                 ),
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 12),
-
-            child: ClipOval(
-              child: Image.asset(
-                'assets/img/app_icon.png',
-               
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           actions: [
             if (_searchActive)
               IconButton(
@@ -474,7 +507,7 @@ class _HomeBottomPanelState extends State<_HomeBottomPanel>
                       ),
                       Switch(
                         value: isEnabled,
-                        activeColor: theme.colorScheme.onPrimary,
+                        activeThumbColor: theme.colorScheme.onPrimary,
                         activeTrackColor: AppTheme.accentGold.withValues(alpha: 0.8),
                         inactiveThumbColor: theme.colorScheme.outline,
                         inactiveTrackColor:
@@ -495,28 +528,28 @@ class _HomeBottomPanelState extends State<_HomeBottomPanel>
                     Expanded(
                       child: _BottomNavAction(
                         icon: Icons.access_time_rounded,
-                        label: 'Prayer',
+                        label: AppLocalizations.of(context)!.prayerTimes,
                         onTap: widget.onPrayer,
                       ),
                     ),
                     Expanded(
                       child: _BottomNavAction(
                         icon: Icons.calendar_month_rounded,
-                        label: 'Hijri',
+                        label: AppLocalizations.of(context)!.hijriCalendar,
                         onTap: widget.onHijri,
                       ),
                     ),
                     Expanded(
                       child: _BottomNavAction(
                         icon: Icons.calculate_rounded,
-                        label: 'Zakat',
+                        label: AppLocalizations.of(context)!.zakatCalculator,
                         onTap: widget.onZakat,
                       ),
                     ),
                     Expanded(
                       child: _BottomNavAction(
                         icon: Icons.settings_rounded,
-                        label: 'Settings',
+                        label: AppLocalizations.of(context)!.settings,
                         onTap: widget.onSettings,
                       ),
                     ),
@@ -626,48 +659,6 @@ class _BottomNavActionState extends State<_BottomNavAction>
   }
 }
 
-class _MoreTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MoreTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: theme.colorScheme.primary),
-      ),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: theme.colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-      onTap: onTap,
-    );
-  }
-}
-
 class _OptionButton extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -734,7 +725,7 @@ class _OptionButtonState extends State<_OptionButton>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: widget.isActive
-                ? activeColor.withOpacity(0.16)
+                ? activeColor.withValues(alpha: 0.16)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(

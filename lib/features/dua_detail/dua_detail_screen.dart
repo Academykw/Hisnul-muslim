@@ -29,17 +29,34 @@ class DuaDetailScreen extends StatefulWidget {
 class _DuaDetailScreenState extends State<DuaDetailScreen> {
   List<Dua> _duas = [];
   bool _loading = true;
+  String? _lastLoadedLocale;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.watch<SettingsService>().localeCode;
+    if (_lastLoadedLocale != locale) {
+      _lastLoadedLocale = locale;
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
+    final settings = context.read<SettingsService>();
     final rows = widget.favoritesOnly
-        ? await DatabaseHelper.instance.getFavoriteDuaDetails(widget.duaId)
-        : await DatabaseHelper.instance.getDuaDetails(widget.duaId);
+        ? await DatabaseHelper.instance.getFavoriteDuaDetails(
+            widget.duaId,
+            locale: settings.localeCode,
+          )
+        : await DatabaseHelper.instance.getDuaDetails(
+            widget.duaId,
+            locale: settings.localeCode,
+          );
     if (!mounted) return;
     setState(() {
       _duas = rows.map(Dua.fromDetailCursor).toList();
@@ -354,7 +371,7 @@ class _DuaDetailCard extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
 
             // Translation
@@ -363,8 +380,9 @@ class _DuaDetailCard extends StatelessWidget {
                 _stripHtml(dua.translation!),
                 style: TextStyle(
                   fontSize: otherFontSize,
-                  color: theme.colorScheme.onSurface,
-                  height: 1.5,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                  height: 1.6,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
 
@@ -415,6 +433,8 @@ class _DuaDetailCard extends StatelessWidget {
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
         .replaceAll('&nbsp;', ' ')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
         .trim();
   }
 }
