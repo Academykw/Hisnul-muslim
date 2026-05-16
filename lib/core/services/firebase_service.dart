@@ -27,13 +27,20 @@ class FirebaseService extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   /// Default placeholder to show when network is unavailable or fetch fails
-  DailyInspiration get _placeholder => DailyInspiration(
-        id: 'placeholder',
-        content: AppConstants.fallbackInspirationContent,
-        source: AppConstants.fallbackInspirationSource,
-        type: "Aya",
-        date: DateTime.now(),
-      );
+  /// Picks a different verse each day from the fallback list
+  DailyInspiration get _placeholder {
+    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays;
+    final index = dayOfYear % AppConstants.fallbackInspirations.length;
+    final fallback = AppConstants.fallbackInspirations[index];
+
+    return DailyInspiration(
+      id: 'placeholder_$index',
+      content: fallback['content']!,
+      source: fallback['source']!,
+      type: "Aya",
+      date: DateTime.now(),
+    );
+  }
 
   Future<void> init() async {
     if (_isInitialized) return;
@@ -74,6 +81,10 @@ class FirebaseService extends ChangeNotifier {
 
   String getInterstitialAdUnitId() {
     return _remoteConfig?.getString('ad_interstitial_unit_id') ?? '';
+  }
+
+  int getInterstitialAdInterval() {
+    return _remoteConfig?.getInt('ad_interstitial_interval') ?? 8;
   }
 
   Future<void> fetchNisabValues() async {
