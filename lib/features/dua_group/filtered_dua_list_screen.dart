@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/settings_service.dart';
 import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
@@ -24,15 +25,29 @@ class FilteredDuaListScreen extends StatefulWidget {
 class _FilteredDuaListScreenState extends State<FilteredDuaListScreen> {
   List<Dua> _duas = [];
   bool _loading = true;
+  String? _lastLoadedLocale;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.watch<SettingsService>().localeCode;
+    if (_lastLoadedLocale != locale) {
+      _lastLoadedLocale = locale;
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
-    final rows = await DatabaseHelper.instance.getDuaGroupsFiltered(widget.filterIds);
+    final settings = context.read<SettingsService>();
+    final rows = await DatabaseHelper.instance.getDuaGroupsFiltered(
+      widget.filterIds,
+      locale: settings.localeCode,
+    );
     if (!mounted) return;
     setState(() {
       _duas = rows.map(Dua.fromGroupCursor).toList();
