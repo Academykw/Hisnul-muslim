@@ -1,0 +1,19 @@
+{
+  "appTitle": "دين أذكار",
+  "appSubtitle": "أدعية وأذكار يومية",
+  "settings": "الإعدادات",
+  "prayerTimes": "أوقات الصلاة",
+  "dailyInspiration": "إلهام يومي",
+  "hijriCalendar": "التقويم الهجري",
+  "zakatCalculator": "حاسبة الزكاة",
+  "categoryIllness": "المرض",
+  "categoryDailyLife": "الحياة اليومية",
+  "categoryTravel": "السفر",
+  "categoryMorningNight": "الصباح والمساء",
+  "categoryPrayer": "الصلاة",
+  "categoryWellbeing": "الرفاهية",
+  "categoryTrials": "الابتلاءات",
+  "categoryHajjUmrah": "الحج والعمرة",
+  "categoryQuranicDuas": "أدعية قرآنية",
+  "categoryAzkar": "أذكار"
+}

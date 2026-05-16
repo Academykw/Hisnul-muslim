@@ -1,0 +1,19 @@
+{
+  "appTitle": "Deen Azkar",
+  "appSubtitle": "Doa & Adzkar Harian",
+  "settings": "Pengaturan",
+  "prayerTimes": "Waktu Sholat",
+  "dailyInspiration": "Inspirasi Harian",
+  "hijriCalendar": "Kalender Hijriah",
+  "zakatCalculator": "Kalkulator Zakat",
+  "categoryIllness": "Penyakit",
+  "categoryDailyLife": "Kehidupan Sehari-hari",
+  "categoryTravel": "Bepergian",
+  "categoryMorningNight": "Pagi/Malam",
+  "categoryPrayer": "Sholat",
+  "categoryWellbeing": "Kesejahteraan",
+  "categoryTrials": "Ujian",
+  "categoryHajjUmrah": "Haji/Umrah",
+  "categoryQuranicDuas": "Doa-doa Qurani",
+  "categoryAzkar": "Azkar"
+}

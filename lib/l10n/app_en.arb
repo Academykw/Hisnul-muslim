@@ -1,0 +1,49 @@
+{
+  "appTitle": "Deen Azkar",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "appSubtitle": "Daily Duas & Adhkar",
+  "@appSubtitle": {
+    "description": "The subtitle of the application"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Label for the settings section"
+  },
+  "prayerTimes": "Prayer Times",
+  "@prayerTimes": {
+    "description": "Label for the prayer times section"
+  },
+  "dailyInspiration": "Daily Inspiration",
+  "@dailyInspiration": {
+    "description": "Label for the daily inspiration section"
+  },
+  "hijriCalendar": "Hijri Calendar",
+  "@hijriCalendar": {
+    "description": "Label for the Hijri calendar section"
+  },
+  "zakatCalculator": "Zakat Calculator",
+  "@zakatCalculator": {
+    "description": "Label for the Zakat calculator section"
+  },
+  "categoryIllness": "Illness",
+  "categoryDailyLife": "Daily Life",
+  "categoryTravel": "Travel",
+  "categoryMorningNight": "Morning/Night",
+  "categoryPrayer": "Prayer",
+  "categoryWellbeing": "Wellbeing",
+  "categoryTrials": "Trials",
+  "categoryHajjUmrah": "Hajj/Umrah",
+  "categoryQuranicDuas": "Quranic Duas",
+  "categoryAzkar": "Azkar",
+  "searchDuas": "Search duas...",
+  "categories": "Categories",
+  "allDuas": "All Duas",
+  "bookmarks": "Bookmarks",
+  "search": "Search",
+  "dailyReminder": "Daily Reminder",
+  "dailyReminderSubtitle": "Don't miss your daily adhkar",
+  "exitConfirm": "Press once again to exit!",
+  "noDuasFound": "No duas found"
+}
