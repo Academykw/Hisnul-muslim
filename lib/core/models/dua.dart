@@ -23,7 +23,7 @@ class Dua {
   factory Dua.fromGroupCursor(Map<String, dynamic> map) {
     return Dua(
       reference: map['_id'] as int,
-      title: map['en_title'] as String?,
+      title: (map['title'] ?? map['en_title']) as String?,
       isFav: (map['fav_count'] as int? ?? 0) > 0,
     );
   }
@@ -34,9 +34,9 @@ class Dua {
       reference: map['_id'] as int,
       isFav: (map['fav'] as int? ?? 0) == 1,
       arabic: map['ar_dua'] as String?,
-      translation: map['en_translation'] as String?,
-      transliteration: map['en_transliteration'] as String?,
-      bookReference: map['en_reference'] as String?,
+      translation: (map['translation'] ?? map['en_translation']) as String?,
+      transliteration: (map['transliteration'] ?? map['en_transliteration']) as String?,
+      bookReference: (map['reference'] ?? map['en_reference']) as String?,
     );
   }
 

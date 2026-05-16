@@ -49,23 +49,37 @@ class DatabaseHelper {
 
   // ─── Dua Group Queries ───────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> getDuaGroups({String? searchFilter}) async {
+  Future<List<Map<String, dynamic>>> getDuaGroups({
+    String? searchFilter,
+    String locale = 'en',
+  }) async {
     final db = await database;
     final filter = searchFilter?.isNotEmpty == true ? '%$searchFilter%' : '%';
+    final langPrefix = _getLangPrefix(locale);
+    final enPrefix = _getLangPrefix('en');
+
     return db.rawQuery('''
-      SELECT g._id, g.en_title,
+      SELECT g._id, 
+        COALESCE(NULLIF(g.${langPrefix}title, ''), g.${enPrefix}title) as title,
         (SELECT COUNT(*) FROM dua WHERE group_id = g._id AND fav = 1) as fav_count
       FROM dua_group g
-      WHERE g.en_title LIKE ?
+      WHERE title LIKE ?
       ORDER BY g._id
     ''', [filter]);
   }
 
-  Future<List<Map<String, dynamic>>> getDuaGroupsFiltered(List<int> ids) async {
+  Future<List<Map<String, dynamic>>> getDuaGroupsFiltered(
+    List<int> ids, {
+    String locale = 'en',
+  }) async {
     final db = await database;
     final placeholders = List.filled(ids.length, '?').join(',');
+    final langPrefix = _getLangPrefix(locale);
+    final enPrefix = _getLangPrefix('en');
+
     return db.rawQuery('''
-      SELECT g._id, g.en_title,
+      SELECT g._id, 
+        COALESCE(NULLIF(g.${langPrefix}title, ''), g.${enPrefix}title) as title,
         (SELECT COUNT(*) FROM dua WHERE group_id = g._id AND fav = 1) as fav_count
       FROM dua_group g
       WHERE g._id IN ($placeholders)
@@ -73,20 +87,34 @@ class DatabaseHelper {
     ''', ids);
   }
 
-  Future<List<Map<String, dynamic>>> getDuaDetails(int groupId) async {
+  Future<List<Map<String, dynamic>>> getDuaDetails(
+    int groupId, {
+    String locale = 'en',
+  }) async {
     final db = await database;
-    return db.query(
-      'dua',
-      columns: ['_id', 'fav', 'ar_dua', 'en_translation', 'en_transliteration', 'en_reference'],
-      where: 'group_id = ?',
-      whereArgs: [groupId],
-    );
+    final langPrefix = _getLangPrefix(locale);
+    final enPrefix = _getLangPrefix('en');
+
+    return db.rawQuery('''
+      SELECT _id, fav, ar_dua,
+        COALESCE(NULLIF(${langPrefix}translation, ''), ${enPrefix}translation) as translation,
+        COALESCE(NULLIF(${langPrefix}transliteration, ''), ${enPrefix}transliteration) as transliteration,
+        COALESCE(NULLIF(${langPrefix}reference, ''), ${enPrefix}reference) as reference
+      FROM dua
+      WHERE group_id = ?
+    ''', [groupId]);
   }
 
-  Future<List<Map<String, dynamic>>> getFavoriteDuaGroups() async {
+  Future<List<Map<String, dynamic>>> getFavoriteDuaGroups({
+    String locale = 'en',
+  }) async {
     final db = await database;
+    final langPrefix = _getLangPrefix(locale);
+    final enPrefix = _getLangPrefix('en');
+
     return db.rawQuery('''
-      SELECT DISTINCT g._id, g.en_title,
+      SELECT DISTINCT g._id, 
+        COALESCE(NULLIF(g.${langPrefix}title, ''), g.${enPrefix}title) as title,
         (SELECT COUNT(*) FROM dua WHERE group_id = g._id AND fav = 1) as fav_count
       FROM dua_group g
       INNER JOIN dua d ON d.group_id = g._id
@@ -95,13 +123,28 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<List<Map<String, dynamic>>> getFavoriteDuaDetails(int groupId) async {
+  Future<List<Map<String, dynamic>>> getFavoriteDuaDetails(
+    int groupId, {
+    String locale = 'en',
+  }) async {
     final db = await database;
+    final langPrefix = _getLangPrefix(locale);
+    final enPrefix = _getLangPrefix('en');
+
     return db.rawQuery('''
-      SELECT _id, fav, ar_dua, en_translation, en_transliteration, en_reference
+      SELECT _id, fav, ar_dua, 
+        COALESCE(NULLIF(${langPrefix}translation, ''), ${enPrefix}translation) as translation,
+        COALESCE(NULLIF(${langPrefix}transliteration, ''), ${enPrefix}transliteration) as transliteration,
+        COALESCE(NULLIF(${langPrefix}reference, ''), ${enPrefix}reference) as reference
       FROM dua
       WHERE group_id = ? AND fav = 1
     ''', [groupId]);
+  }
+
+  String _getLangPrefix(String locale) {
+    if (locale == 'id') return 'id_';
+    if (locale == 'ur') return 'ur_';
+    return 'en_';
   }
 
   // ─── Favorite Toggle ─────────────────────────────────────────────────────
