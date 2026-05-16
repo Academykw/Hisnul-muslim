@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:deen_azkar/l10n/app_localizations.dart';
 import 'core/services/settings_service.dart';
 import 'core/services/prayer_service.dart';
 import 'core/services/audio_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/ad_service.dart';
+import 'core/services/update_service.dart';
 import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_theme.dart';
 
 Future<void> main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Use a global error handler to catch initialization crashes
+  FlutterError.onError = (details) {
+    debugPrint("Flutter Error: ${details.exception}");
+    debugPrint("Stack Trace: ${details.stack}");
+  };
 
   // Initialize service instances
   final settings = SettingsService();
@@ -46,8 +54,11 @@ Future<void> main() async {
     ),
   );
 
-  // Perform async initializations in the background
-  _initServices(prayerService, firebaseService, adService);
+  // Perform async initializations in the background after a short delay
+  // to ensure the UI starts up smoothly first
+  Future.delayed(const Duration(seconds: 2), () {
+    _initServices(prayerService, firebaseService, adService);
+  });
 }
 
 Future<void> _initServices(
@@ -73,8 +84,9 @@ Future<void> _initServices(
   // 3. App Services
   try {
     await prayer.init();
+    await UpdateService.checkForUpdate();
   } catch (e) {
-    debugPrint("Prayer service init failed: $e");
+    debugPrint("Prayer service or Update check failed: $e");
   }
 }
 
@@ -87,12 +99,15 @@ class DeenAzkarApp extends StatelessWidget {
     final settings = context.watch<SettingsService>();
 
     return MaterialApp(
-      title: 'Deen Azkar',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
       themeAnimationStyle: AnimationStyle.noAnimation,
       themeMode: settings.themeMode,
+      locale: settings.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const SplashScreen(),
     );
   }
