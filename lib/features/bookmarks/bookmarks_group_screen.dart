@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/dua.dart';
+import '../../core/services/settings_service.dart';
 import '../../core/services/ad_service.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/banner_ad_widget.dart';
@@ -25,7 +26,10 @@ class _BookmarksGroupScreenState extends State<BookmarksGroupScreen> {
   }
 
   Future<void> _loadData() async {
-    final rows = await DatabaseHelper.instance.getFavoriteDuaGroups();
+    final settings = context.read<SettingsService>();
+    final rows = await DatabaseHelper.instance.getFavoriteDuaGroups(
+      locale: settings.localeCode,
+    );
     if (!mounted) return;
     setState(() {
       _groups = rows.map(Dua.fromGroupCursor).toList();
