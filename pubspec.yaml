@@ -1,7 +1,7 @@
 name: deen_azkar
 description: Deen Azkar - Daily Duas & Adhkar app.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.6.0+6
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -39,8 +39,17 @@ dependencies:
   # Shared preferences
   shared_preferences: ^2.2.3
 
+  # In-app updates
+  in_app_update: ^4.2.4
+
+  # Home Widget
+  home_widget: ^0.9.1
+
   # Share
   share_plus: ^10.1.4
+
+  flutter_localizations:
+    sdk: flutter
 
   # Icons
   flutter_svg: ^2.0.10
@@ -54,7 +63,7 @@ dependencies:
   geocoding: ^3.0.0
   flutter_local_notifications: ^17.2.1
   android_alarm_manager_plus: ^4.0.3
-  intl: ^0.19.0
+  intl: 0.20.2
   hijri: ^3.0.0
   timezone: ^0.9.4
   flutter_timezone: ^5.0.2
@@ -72,6 +81,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/db/
