@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "deen_azkar",
-      "version": "1.0.0+1",
+      "version": "1.6.0+6",
       "dependencies": [
         "adhan_dart",
         "android_alarm_manager_plus",
@@ -17,6 +17,7 @@
         "firebase_remote_config",
         "flutter",
         "flutter_local_notifications",
+        "flutter_localizations",
         "flutter_svg",
         "flutter_timezone",
         "geocoding",
@@ -24,7 +25,9 @@
         "google_fonts",
         "google_mobile_ads",
         "hijri",
+        "home_widget",
         "http",
+        "in_app_update",
         "intl",
         "just_audio",
         "path",
@@ -119,7 +122,7 @@
     },
     {
       "name": "intl",
-      "version": "0.19.0",
+      "version": "0.20.2",
       "dependencies": [
         "clock",
         "meta",
@@ -193,6 +196,15 @@
       ]
     },
     {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter",
+        "intl",
+        "path"
+      ]
+    },
+    {
       "name": "share_plus",
       "version": "10.1.4",
       "dependencies": [
@@ -210,6 +222,22 @@
         "url_launcher_windows",
         "web",
         "win32"
+      ]
+    },
+    {
+      "name": "home_widget",
+      "version": "0.9.1",
+      "dependencies": [
+        "flutter",
+        "path_provider",
+        "path_provider_foundation"
+      ]
+    },
+    {
+      "name": "in_app_update",
+      "version": "4.2.5",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -742,6 +770,16 @@
       ]
     },
     {
+      "name": "path_provider_foundation",
+      "version": "2.6.0",
+      "dependencies": [
+        "ffi",
+        "flutter",
+        "objective_c",
+        "path_provider_platform_interface"
+      ]
+    },
+    {
       "name": "shared_preferences_windows",
       "version": "2.4.1",
       "dependencies": [
@@ -1018,16 +1056,6 @@
       ]
     },
     {
-      "name": "path_provider_foundation",
-      "version": "2.6.0",
-      "dependencies": [
-        "ffi",
-        "flutter",
-        "objective_c",
-        "path_provider_platform_interface"
-      ]
-    },
-    {
       "name": "path_provider_android",
       "version": "2.3.1",
       "dependencies": [
@@ -1202,6 +1230,19 @@
       ]
     },
     {
+      "name": "objective_c",
+      "version": "9.3.0",
+      "dependencies": [
+        "code_assets",
+        "collection",
+        "ffi",
+        "hooks",
+        "logging",
+        "native_toolchain_c",
+        "pub_semver"
+      ]
+    },
+    {
       "name": "webview_flutter_platform_interface",
       "version": "2.15.1",
       "dependencies": [
@@ -1235,19 +1276,6 @@
       "name": "platform",
       "version": "3.1.6",
       "dependencies": []
-    },
-    {
-      "name": "objective_c",
-      "version": "9.3.0",
-      "dependencies": [
-        "code_assets",
-        "collection",
-        "ffi",
-        "hooks",
-        "logging",
-        "native_toolchain_c",
-        "pub_semver"
-      ]
     },
     {
       "name": "jni_flutter",

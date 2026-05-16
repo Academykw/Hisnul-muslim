@@ -260,6 +260,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_localizations",
+      "rootUri": "file:///C:/src/flutter/packages/flutter_localizations",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "flutter_svg",
       "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_svg-2.2.4",
       "packageUri": "lib/",
@@ -368,6 +374,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "home_widget",
+      "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/home_widget-0.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "hooks",
       "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/hooks-1.0.3",
       "packageUri": "lib/",
@@ -392,10 +404,16 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "intl",
-      "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
+      "name": "in_app_update",
+      "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/in_app_update-4.2.5",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "intl",
+      "rootUri": "file:///C:/Users/usman/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "jni",

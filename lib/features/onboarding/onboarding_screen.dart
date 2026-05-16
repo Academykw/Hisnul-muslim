@@ -65,11 +65,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_isFinishing) return;
     setState(() => _isFinishing = true);
 
-    final settings = context.read<SettingsService>();
-    final prayerService = context.read<PrayerService>();
+    try {
+      final settings = context.read<SettingsService>();
+      final prayerService = context.read<PrayerService>();
 
-    await prayerService.completeInitialPrayerSetup();
-    await settings.setOnboardingDone(true);
+      // Set onboarding as done BEFORE the await, so if it hangs, 
+      // the next app open skips onboarding
+      await settings.setOnboardingDone(true);
+      
+      // Complete setup with a total timeout
+      await prayerService.completeInitialPrayerSetup().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => debugPrint("Setup timed out, continuing to home"),
+      );
+    } catch (e) {
+      debugPrint("Error finishing onboarding: $e");
+    }
 
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
