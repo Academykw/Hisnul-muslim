@@ -407,6 +407,9 @@ class PrayerService extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error updating location: $e");
     } finally {
+      // Ensure we save and update UI even if address resolution was slow or failed
+      await _saveCachedLocation();
+      _calculatePrayers();
       _isLoading = false;
       notifyListeners();
     }
@@ -432,6 +435,10 @@ class PrayerService extends ChangeNotifier {
 
       if (resolvedAddress.isNotEmpty) {
         _currentAddress = resolvedAddress;
+        // Save the updated address string to persistent storage
+        await _saveCachedLocation();
+        // Update the UI
+        notifyListeners();
       }
     } catch (e) {
       debugPrint("Error resolving location address: $e");
