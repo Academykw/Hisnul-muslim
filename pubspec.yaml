@@ -41,6 +41,8 @@ dependencies:
 
   # In-app updates
   in_app_update: ^4.2.4
+  #in-app review
+  in_app_review: ^2.0.12
 
   # Home Widget
   home_widget: ^0.9.1
