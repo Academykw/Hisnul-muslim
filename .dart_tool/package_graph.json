@@ -27,6 +27,7 @@
         "hijri",
         "home_widget",
         "http",
+        "in_app_review",
         "in_app_update",
         "intl",
         "just_audio",
@@ -231,6 +232,14 @@
         "flutter",
         "path_provider",
         "path_provider_foundation"
+      ]
+    },
+    {
+      "name": "in_app_review",
+      "version": "2.0.12",
+      "dependencies": [
+        "flutter",
+        "in_app_review_platform_interface"
       ]
     },
     {
@@ -780,6 +789,16 @@
       ]
     },
     {
+      "name": "in_app_review_platform_interface",
+      "version": "2.0.5",
+      "dependencies": [
+        "flutter",
+        "platform",
+        "plugin_platform_interface",
+        "url_launcher"
+      ]
+    },
+    {
       "name": "shared_preferences_windows",
       "version": "2.4.1",
       "dependencies": [
@@ -1243,6 +1262,11 @@
       ]
     },
     {
+      "name": "platform",
+      "version": "3.1.6",
+      "dependencies": []
+    },
+    {
       "name": "webview_flutter_platform_interface",
       "version": "2.15.1",
       "dependencies": [
@@ -1270,11 +1294,6 @@
     {
       "name": "synchronized",
       "version": "3.4.0+1",
-      "dependencies": []
-    },
-    {
-      "name": "platform",
-      "version": "3.1.6",
       "dependencies": []
     },
     {
@@ -1390,6 +1409,44 @@
         "collection",
         "meta",
         "pub_semver"
+      ]
+    },
+    {
+      "name": "url_launcher",
+      "version": "6.3.2",
+      "dependencies": [
+        "flutter",
+        "url_launcher_android",
+        "url_launcher_ios",
+        "url_launcher_linux",
+        "url_launcher_macos",
+        "url_launcher_platform_interface",
+        "url_launcher_web",
+        "url_launcher_windows"
+      ]
+    },
+    {
+      "name": "url_launcher_macos",
+      "version": "3.2.5",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_ios",
+      "version": "6.4.1",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_android",
+      "version": "6.3.29",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
       ]
     }
   ],

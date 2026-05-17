@@ -8,6 +8,7 @@ import 'core/services/audio_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/ad_service.dart';
 import 'core/services/update_service.dart';
+import 'core/services/review_service.dart';
 import 'features/splash/splash_screen.dart';
 import 'shared/theme/app_theme.dart';
 
@@ -27,11 +28,13 @@ Future<void> main() async {
   final audioService = AudioService();
   final firebaseService = FirebaseService();
   final adService = AdService();
+  final reviewService = ReviewService();
 
   try {
     await settings.init();
+    await reviewService.init();
   } catch (e) {
-    debugPrint("Settings init failed: $e");
+    debugPrint("Settings or Review init failed: $e");
   }
 
   try {
@@ -57,7 +60,7 @@ Future<void> main() async {
   // Perform async initializations in the background after a short delay
   // to ensure the UI starts up smoothly first
   Future.delayed(const Duration(seconds: 2), () {
-    _initServices(prayerService, firebaseService, adService);
+    _initServices(prayerService, firebaseService, adService, reviewService);
   });
 }
 
@@ -65,6 +68,7 @@ Future<void> _initServices(
   PrayerService prayer,
   FirebaseService firebase,
   AdService ads,
+  ReviewService review,
 ) async {
   // 1. Orientation
   SystemChrome.setPreferredOrientations([
@@ -85,8 +89,9 @@ Future<void> _initServices(
   try {
     await prayer.init();
     await UpdateService.checkForUpdate();
+    await review.checkAndRequestReview();
   } catch (e) {
-    debugPrint("Prayer service or Update check failed: $e");
+    debugPrint("Prayer service, Update check or Review failed: $e");
   }
 }
 
