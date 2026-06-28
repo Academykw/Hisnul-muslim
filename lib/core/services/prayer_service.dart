@@ -423,15 +423,13 @@ class PrayerService extends ChangeNotifier {
       );
       Placemark place = placemarks[0];
       
-      // Inclusion of more precise components like street name
+      // Just state and country as requested
       final parts = [
-        place.street,
-        place.subLocality,
-        place.locality,
+        place.administrativeArea,
+        place.country,
       ].where((part) => part != null && part.trim().isNotEmpty).toList();
 
-      // If we have too many parts, take the most specific two (e.g., Street and Area)
-      final resolvedAddress = parts.take(2).join(', ');
+      final resolvedAddress = parts.join(', ');
 
       if (resolvedAddress.isNotEmpty) {
         _currentAddress = resolvedAddress;
@@ -484,7 +482,7 @@ class PrayerService extends ChangeNotifier {
   }
 
   String _formatCoordinates(double latitude, double longitude) {
-    return '${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)}';
+    return 'Location Found';
   }
 
   void _calculatePrayers({bool scheduleNotifications = true}) {
@@ -538,6 +536,9 @@ class PrayerService extends ChangeNotifier {
     _lastShownAdhanKey = key;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lastAdhanNotificationKey, key);
+
+    // Update widget immediately when a prayer is due
+    unawaited(_updateHomeScreenWidget());
 
     if (_isAndroid) return;
 
@@ -726,8 +727,27 @@ class PrayerService extends ChangeNotifier {
     // Schedule Dua Reminders (Morning/Evening)
     await _scheduleDuaReminders(requestNotificationPermission: false);
 
-    // Schedule a background task to refresh prayers for tomorrow
-    // This alarm will fire at 1 AM tomorrow
+    // Schedule background updates for the widget at each prayer time on Android
+    if (_isAndroid) {
+      final now = DateTime.now();
+      for (var dayOffset = 0; dayOffset < 7; dayOffset++) {
+        final date = now.add(Duration(days: dayOffset));
+        for (final prayer in _prayersFor(date)) {
+          if (!prayer.time.isAfter(now)) continue;
+
+          // Run update 1 minute after each prayer time to flip the widget to the next prayer
+          await AndroidAlarmManager.oneShotAt(
+            prayer.time.add(const Duration(minutes: 1)),
+            prayer.id + (dayOffset * 10) + 2000,
+            alarmCallback,
+            exact: true,
+            wakeup: true,
+          );
+        }
+      }
+    }
+
+    // Schedule a background task to refresh prayers for tomorrow at 1 AM
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1, 1, 0);
 
