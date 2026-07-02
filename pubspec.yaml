@@ -11,67 +11,67 @@ dependencies:
     sdk: flutter
 
   # Database
-  sqflite: ^2.3.2
+  sqflite: ^2.4.3
   path: ^1.9.0
-  path_provider: ^2.1.2
+  path_provider: ^2.1.6
 
   # Audio
-  just_audio: ^0.9.39
+  just_audio: ^0.10.5
 
   # Firebase
-  firebase_core: ^3.0.0
-  cloud_firestore: ^5.0.0
-  firebase_remote_config: ^5.0.0
-  firebase_database: ^11.0.0
+  firebase_core: ^4.11.0
+  cloud_firestore: ^6.6.0
+  firebase_remote_config: ^6.5.3
+  firebase_database: ^12.4.4
 
   # Ads
-  google_mobile_ads: ^5.1.0
+  google_mobile_ads: ^9.0.0
 
   # Connectivity
-  connectivity_plus: ^6.0.3
+  connectivity_plus: ^7.1.1
 
   # Screenshot & Sharing
   screenshot: ^3.0.0
 
   # State management
-  provider: ^6.1.2
+  provider: ^6.1.5
 
   # Shared preferences
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.5.5
 
   # In-app updates
-  in_app_update: ^4.2.4
+  in_app_update: ^4.2.5
   #in-app review
   in_app_review: ^2.0.12
 
   # Home Widget
-  home_widget: ^0.9.1
+  home_widget: ^0.9.3
 
   # Share
-  share_plus: ^10.1.4
+  share_plus: ^13.2.0
 
   flutter_localizations:
     sdk: flutter
 
   # Icons
-  flutter_svg: ^2.0.10
+  flutter_svg: ^2.3.0
 
   # Fonts
-  google_fonts: ^6.2.1
+  google_fonts: ^8.1.0
 
   # Prayer Times & Location
-  adhan_dart: ^1.2.0
-  geolocator: ^13.0.1
-  geocoding: ^3.0.0
-  flutter_local_notifications: ^17.2.1
-  android_alarm_manager_plus: ^4.0.3
-  intl: 0.20.2
-  hijri: ^3.0.0
-  timezone: ^0.9.4
-  flutter_timezone: ^5.0.2
+  adhan_dart: ^2.0.1
+  geolocator: ^14.0.3
+  geocoding: ^4.0.0
+  flutter_local_notifications: ^22.0.1
+  android_alarm_manager_plus: ^5.0.0
+  intl: ^0.20.2
+  hijri: ^3.0.1
+  timezone: ^0.11.0
+  flutter_timezone: ^5.1.0
 
   # Zakat (HTTP)
-  http: ^1.2.1
+  http: ^1.6.0
 
   cupertino_icons: ^1.0.2
 

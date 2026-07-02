@@ -35,16 +35,20 @@ class ReviewService {
       final installDate = DateTime.fromMillisecondsSinceEpoch(installDateMs);
 
       // Rule 1: First check must be after 7 days
-      if (now.difference(installDate).inDays < 7) {
-        debugPrint('ReviewService: Too early for first review (Needs 7 days)');
+      // In debug mode, we allow it after 0 days for testing
+      final daysRequired = kDebugMode ? 0 : 7;
+      if (now.difference(installDate).inDays < daysRequired) {
+        debugPrint('ReviewService: Too early for first review (Needs $daysRequired days)');
         return;
       }
 
       // Rule 2: If we previously attempted (user clicked Not Now), wait 5 more days
+      // In debug mode, we allow it after 0 days for testing
+      final retryDaysRequired = kDebugMode ? 0 : 5;
       if (lastAttemptMs != null) {
         final lastAttempt = DateTime.fromMillisecondsSinceEpoch(lastAttemptMs);
-        if (now.difference(lastAttempt).inDays < 5) {
-          debugPrint('ReviewService: Waiting 5 days since last "Not Now" action');
+        if (now.difference(lastAttempt).inDays < retryDaysRequired) {
+          debugPrint('ReviewService: Waiting $retryDaysRequired days since last "Not Now" action');
           return;
         }
       }
