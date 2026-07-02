@@ -85,14 +85,14 @@ Future<void> _initServices(
     debugPrint("Firebase/Ads init failed or timed out: $e");
   }
 
-  // 3. App Services
-  try {
-    await prayer.init();
-    await UpdateService.checkForUpdate();
-    await review.checkAndRequestReview();
-  } catch (e) {
-    debugPrint("Prayer service, Update check or Review failed: $e");
-  }
+  // 3. App Services (Run independently to avoid blocking each other)
+  prayer.init().catchError((e) => debugPrint("Prayer service init failed: $e"));
+  
+  // Update check often fails in debug/emulator, so we run it separately
+  UpdateService.checkForUpdate();
+  
+  // Review check has its own internal logic and timing
+  review.checkAndRequestReview();
 }
 
 class DeenAzkarApp extends StatelessWidget {
