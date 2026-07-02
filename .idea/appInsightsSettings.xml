@@ -8,7 +8,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.homegast.pharaohsroom" />
+                  <option name="appId" value="com.nashedy.aprokomara" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
@@ -22,7 +22,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.deen.adkhartest" />
+                  <option name="appId" value="com.deen.adkhar" />
                   <option name="mobileSdkAppId" value="1:428568192222:android:049a24c369fdcbd7268e4f" />
                   <option name="projectId" value="iscollection" />
                   <option name="projectNumber" value="428568192222" />
