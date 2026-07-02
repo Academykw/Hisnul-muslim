@@ -226,14 +226,12 @@ class PrayerService extends ChangeNotifier {
     
     // We use a simple schedule for testing
     await _notifications.zonedSchedule(
-      9999,
-      'Test Notification',
-      'This is a test notification from Deen Azkar.',
-      tz.TZDateTime.from(testTime, tz.local),
-      _reminderNotificationDetails(),
+      id: 9999,
+      title: 'Test Notification',
+      body: 'This is a test notification from Deen Azkar.',
+      scheduledDate: tz.TZDateTime.from(testTime, tz.local),
+      notificationDetails: _reminderNotificationDetails(),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -259,7 +257,7 @@ class PrayerService extends ChangeNotifier {
     const initSettings =
         InitializationSettings(android: androidInit, iOS: iosInit);
     await _notifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _handleNotificationResponse,
       onDidReceiveBackgroundNotificationResponse: prayerNotificationTapBackground,
     );
@@ -388,7 +386,9 @@ class PrayerService extends ChangeNotifier {
     try {
       // Use a timeout to prevent hanging if GPS is slow/unavailable
       _currentPosition = await Geolocator.getCurrentPosition(
-        timeLimit: const Duration(seconds: 15),
+        locationSettings: const LocationSettings(
+          timeLimit: Duration(seconds: 15),
+        ),
       );
 
       _currentAddress = _formatCoordinates(
@@ -542,13 +542,13 @@ class PrayerService extends ChangeNotifier {
 
     if (_isAndroid) return;
 
-    await _notifications.cancel(duePrayer.id);
+    await _notifications.cancel(id: duePrayer.id);
 
     await _notifications.show(
-      duePrayer.id,
-      'Prayer Time',
-      'It is time for ${duePrayer.name}',
-      _prayerNotificationDetails(playNotificationSound: false, ongoing: true),
+      id: duePrayer.id,
+      title: 'Prayer Time',
+      body: 'It is time for ${duePrayer.name}',
+      notificationDetails: _prayerNotificationDetails(playNotificationSound: false, ongoing: true),
       payload: stopAdhanPayload,
     );
     await _playAdhan(duePrayer.id);
@@ -579,7 +579,7 @@ class PrayerService extends ChangeNotifier {
     await _adhanPlayerStateSubscription?.cancel();
     _adhanPlayerStateSubscription = null;
     if (notificationId != null) {
-      await _notifications.cancel(notificationId);
+      await _notifications.cancel(id: notificationId);
     } else {
       await _notifications.cancelAll();
       await _schedulePrayerNotifications();
@@ -708,14 +708,12 @@ class PrayerService extends ChangeNotifier {
           if (!prayer.time.isAfter(DateTime.now())) continue;
 
           await _notifications.zonedSchedule(
-            prayer.id,
-            'Prayer Time',
-            'It is time for ${prayer.name}',
-            tz.TZDateTime.from(prayer.time, tz.local),
-            _prayerNotificationDetails(playNotificationSound: true),
+            id: prayer.id,
+            title: 'Prayer Time',
+            body: 'It is time for ${prayer.name}',
+            scheduledDate: tz.TZDateTime.from(prayer.time, tz.local),
+            notificationDetails: _prayerNotificationDetails(playNotificationSound: true),
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
             payload: stopAdhanPayload,
           );
         }
@@ -799,10 +797,10 @@ class PrayerService extends ChangeNotifier {
 
     // Clear existing reminders first (up to 30 to clean up old ones)
     for (var dayOffset = 0; dayOffset < 30; dayOffset++) {
-      await _notifications.cancel(100 + dayOffset);
-      await _notifications.cancel(200 + dayOffset);
-      await _notifications.cancel(_fastingReminderBaseId + dayOffset);
-      await _notifications.cancel(_kahfReminderBaseId + dayOffset);
+      await _notifications.cancel(id: 100 + dayOffset);
+      await _notifications.cancel(id: 200 + dayOffset);
+      await _notifications.cancel(id: _fastingReminderBaseId + dayOffset);
+      await _notifications.cancel(id: _kahfReminderBaseId + dayOffset);
     }
 
     if (!enabled) return;
@@ -923,14 +921,12 @@ class PrayerService extends ChangeNotifier {
       debugPrint('Scheduling reminder "$title" (id: $id) for $scheduledTz (Local: $scheduledTime)');
 
       await _notifications.zonedSchedule(
-        id,
-        title,
-        body,
-        scheduledTz,
-        _reminderNotificationDetails(),
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledTz,
+        notificationDetails: _reminderNotificationDetails(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (e) {
       debugPrint('Unable to schedule reminder "$title" at $scheduledTime: $e');
